@@ -5,3 +5,17 @@
 # **
 # ***
 # ****
+
+
+def print_star(num):
+    for i in range(num):
+        print('*' * (i + 1))
+
+
+def main():
+    input_num = int(input())
+    print_star(input_num)
+
+
+if __name__ == '__main__':
+    main()
