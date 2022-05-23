@@ -16,7 +16,7 @@ def boolean_state_to_state():       # True 와 False 로 표현된 boolean_state
             state[i] = "On"
         else:
             state[i] = "Off"
-            switch_time[i] += 1
+            switch_time[i] += 1         # 점멸이 Off 가 된 순간 부터 시간 측정 시작
 
 
 while True:
