@@ -1,4 +1,3 @@
-minute = 0
 boolean_state = [True, True, True, True, True]
 state = ["On", "On", "On", "On", "On"]
 switch_time = [0, 0, 0, 0, 0]
@@ -19,21 +18,27 @@ def boolean_state_to_state():       # True 와 False 로 표현된 boolean_state
             switch_time[i] += 1         # 점멸이 Off 가 된 순간 부터 시간 측정 시작
 
 
-while True:
-    minute += 1
-    num = int(input("입력 - "))
+def main():
+    minute = 0
+    while True:
+        minute += 1
+        num = int(input("입력 - "))
 
-    if num == 6:
-        print("출력 - \"game over\"")
-        break
+        if num == 6:
+            print("출력 - \"game over\"")
+            break
 
-    initialization_by_input(num)
-    boolean_state_to_state()
+        initialization_by_input(num)
+        boolean_state_to_state()
 
-    for i in range(5):                       # state 가 Off 가 된 후 5분이 지났을 때 다시 On 으로 바꿔 준다.
-        if switch_time[i] % 5 == 0:          # Off 가 된 후 5분마다 판단
-            if not boolean_state[i]:         # 점멸의 상태가 Off 인 것을 판단
-                boolean_state[i] = True      # Off 를 On 으로 변환
-                switch_time[i] = 0           # Off 였던 시간을 0으로 초기화
+        for i in range(5):                       # state 가 Off 가 된 후 5분이 지났을 때 다시 On 으로 바꿔 준다.
+            if switch_time[i] % 5 == 0:          # Off 가 된 후 5분마다 판단
+                if not boolean_state[i]:         # 점멸의 상태가 Off 인 것을 판단
+                    boolean_state[i] = True      # Off 를 On 으로 변환
+                    switch_time[i] = 0           # Off 였던 시간을 0으로 초기화
 
-    print("출력 - %d분: 1:%s, 2:%s, 3:%s, 4:%s, 5:%s" % (minute, state[0], state[1], state[2], state[3], state[4]))
+        print("출력 - %d분: 1:%s, 2:%s, 3:%s, 4:%s, 5:%s" % (minute, state[0], state[1], state[2], state[3], state[4]))
+
+
+if __name__ == '__main__':
+    main()
