@@ -46,13 +46,3 @@ def input_starting_point_and_radius():
     starting_point_2 = input_int[2]
     radius_2 = input_int[3]
 
-
-def relationship_of_circles(input)
-
-
-def main():
-
-
-
-if __name__ == '__main__':
-    main()
