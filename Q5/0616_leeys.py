@@ -42,18 +42,19 @@
 # 두 원의 공통 접선의 기울기 출력
 # -> 접선의 방정식 공식을 이용 하여 함수 3 처럼 중첩 반복문 으로 찾으면 어떨까
 #   -> 기울기 의 분모가 0일 때 if 문으로 inf 출력
-sp1 = 0
-r1 = 0
-sp2 = 0
-r2 = 0
 
 
 def input_starting_point_and_radius():
-    input_string = input().split(',')
+    input_string = input("입력: ").split(',')
     return list(map(lambda x: int(x), input_string))
 
 
 def relation_of_circles(input_list):
+    global sp1
+    global sp2
+    global r1
+    global r2
+
     sp1 = input_list[0]         # starting point 1
     r1 = input_list[1]          # radius 1
     sp2 = input_list[2]         # starting point 2
@@ -71,20 +72,20 @@ def relation_of_circles(input_list):
         print("교차")
 
 
-def x_of_point_of_contact():
-    for x1 in range(sp1 - r1, sp1 + r1 + 1):
-        for y1 in range(r1 + 1):
-            for x2 in range(sp2 - r2, sp2 + r2 + 1):
-                for y2 in range(r2 + 1):
-                    if pow(x1 - sp1, 2) + pow(y1, 2) == pow(r1, 2) and pow(x2 - r2, 2) + pow(y2, 2) == pow(r2, 2):
-                        if x1 == x2 and y1 == y2:
-                            print(str(x1))
+def x_value_of_point_of_contact():
+    if r1 + r2 < abs(sp1 - sp2):
+        print([])
+    else:
+        try:
+            print([(sp1 ** 2 - sp2 ** 2 - (r1 ** 2 - r2 ** 2)) / (2 * (sp1 - sp2))])
+        except ZeroDivisionError:
+            print([])
 
 
 def main():
     input_list = input_starting_point_and_radius()
     relation_of_circles(input_list)
-    x_of_point_of_contact()
+    x_value_of_point_of_contact()
 
 
 if __name__ == '__main__':
