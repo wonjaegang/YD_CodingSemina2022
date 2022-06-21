@@ -18,13 +18,15 @@
 # 출력: a) 외접
 #      b) [2]
 #      c) [0.75, -0.75, 'inf']
+
 import math
 
 origin1, radius1, origin2, radius2 = map(int, input('원의 위치와 반지름을 각각 입력하시오').split())
 distance = math.sqrt((origin1-origin2)**2)  #원 중심 간의 거리
 
+#두 원이 외접
 if radius1+radius2 == distance:
-    print("a) 외접\n")  # c 결과 ㅁ,ㅌ,inf
+    print("a) 외접\n")
 
     # x 좌표 구하는 식
     if origin1 < origin2:
@@ -34,9 +36,10 @@ if radius1+radius2 == distance:
     print("b) [%d]\n" % x_point)
 
     # 공통접선 기울기 배열 출력
-    slope = (abs(radius1-radius2))/(math.sqrt((origin1-origin2)**2+(radius1-radius2)**2))
-    print("c) [%1.2f, %1.2f, 'inf']" % (slope, -slope))
+    slope = (abs(radius1-radius2))/(math.sqrt((origin1-origin2)**2-(radius1-radius2)**2))
+    print("c) [%.2f, %.2f, 'inf']" % (slope, -slope))
 
+#두 원이 내접
 elif abs(radius1-radius2) == distance:
     print("a) 내접")
 
@@ -56,16 +59,18 @@ elif abs(radius1-radius2) == distance:
     # 공통접선 기울기 배열 출력
     print("c) ['inf']")
 
+#두 원이 교차
 elif abs(radius1-radius2) < distance < radius1+radius2:
-    print("a) 교차")  # c 결과 ㅁ,ㅌ
+    print("a) 교차")
 
     # x 좌표 구하는 식
     print("b) []")
 
     # 공통접선 기울기 배열 출력
-    slope = (abs(radius1-radius2))/(math.sqrt((origin1-origin2)**2+(radius1-radius2)**2))
-    print("c) [%1.2f, %1.2f]" % (slope, -slope))
+    slope = (abs(radius1-radius2))/(math.sqrt((origin1-origin2)**2-(radius1-radius2)**2))
+    print("c) [%.2f, %.2f]" % (slope, -slope))
 
+#두 원이 포함
 elif abs(radius1-radius2) > distance:
     print("a) 포함")
 
@@ -75,10 +80,14 @@ elif abs(radius1-radius2) > distance:
     # 공통접선 기울기 배열 출력
     print("c) ['inf']")
 
+#두 원이 외부
 else:
-    print("a) 외부")  # c 결과 a,c,v,d
+    print("a) 외부")
 
     # x 좌표 구하는 식
     print("b) []")
 
     # 공통접선 기울기 배열 출력
+    slope1 = (abs(radius1-radius2))/(math.sqrt((origin1-origin2)**2-(radius1-radius2)**2))
+    slope2 = (radius1+radius2)/(math.sqrt((origin1-origin2)**2-(radius1+radius2)**2))
+    print("c) [%.2f, %.2f, %.2f, %.2f]" % (slope1, -slope1, slope2, -slope2))
