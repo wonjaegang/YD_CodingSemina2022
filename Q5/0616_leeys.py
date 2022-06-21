@@ -39,7 +39,8 @@ def x_value_of_point_of_contact():      # 접점의 x 값을 구하는 함수
         print("     b)", [])
     else:
         try:
-            print("     b)", [(sp1 ** 2 - sp2 ** 2 - (r1 ** 2 - r2 ** 2)) / (2 * (sp1 - sp2))])
+            x_value = (sp1 ** 2 - sp2 ** 2 - (r1 ** 2 - r2 ** 2)) / (2 * (sp1 - sp2))
+            print("     b)", [round(x_value, 2)])
         except ZeroDivisionError:
             print("     b)", [])
 
