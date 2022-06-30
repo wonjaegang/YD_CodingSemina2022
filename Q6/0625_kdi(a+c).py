@@ -35,7 +35,7 @@ while(1):
          grid[h - 2][w - 1] = 'O'
 
     # 아래칸
-    if h <= H:
+    if h <= H-1:
         if grid[h][w - 1] == 'O':
          grid[h][w - 1] = 'X'
         else:
@@ -49,7 +49,7 @@ while(1):
          grid[h - 1][w - 2] = 'O'
 
     # 우측칸
-    if w <= W:
+    if w <= W-1:
         if grid[h - 1][w] == 'O':
          grid[h - 1][w] = 'X'
         else:
