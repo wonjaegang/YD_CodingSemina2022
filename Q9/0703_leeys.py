@@ -1,9 +1,9 @@
-def create_grid():
+def create_grid():                                                                     # 격자 생성
     grid = [['X' for _ in range(7)] for _ in range(7)]
     return grid
 
 
-def print_grid(grid):
+def print_grid(grid):                                                                  # 격자 출력
     for i in grid:
         for j in i:
             if j == 6:
@@ -14,17 +14,17 @@ def print_grid(grid):
     print()
 
 
-def input_first_point_and_second_point():
+def input_first_point_and_second_point():                                               # 머리 좌표와 꼬리 좌표 입력
     input_string = input("배치할 배의 머리 좌표, 꼬리 좌표 입력 : ").split(',')
     return list(map(lambda x: int(x), input_string))
 
 
-def input_attack_point():
+def input_attack_point():                                                               # 공격할 좌표 입력
     input_string = input("공격할 좌표 입력 : ").split(',')
     return list(map(lambda x: int(x), input_string))
 
 
-def put_the_battleship(grid):
+def put_the_battleship(grid):                                                           # 각각의 배를 배치
     for _ in range(2, 6):
         x1, y1, x2, y2 = input_first_point_and_second_point()
         if x1 == x2:
@@ -40,7 +40,7 @@ def put_the_battleship(grid):
     return grid
 
 
-def simultaneous_print_of_two_gird(grid1, grid2):
+def simultaneous_print_of_two_gird(grid1, grid2):                                       # 두 개의 격자를 동시에 출력
     print("player 1                      player 2")
     for i in range(7):
         for j in range(7):
@@ -49,10 +49,9 @@ def simultaneous_print_of_two_gird(grid1, grid2):
         for j in range(7):
             print(grid2[i][j], end="  ")
         print()
-    print()
 
 
-def judge_of_success_or_failure_by_attack(grid1, grid2):
+def judge_of_success_or_failure_by_attack(grid1, grid2):                                # 공격의 성공 여부를 판단
     new_grid1 = create_grid()
     new_grid2 = create_grid()
     while True:
@@ -94,7 +93,7 @@ def main():
     grid_p2 = put_the_battleship(create_grid())
     print("배치 종료. 자신의 배치 재확인.")
     simultaneous_print_of_two_gird(grid_p1, grid_p2)
-    print("상대의 배가 모두 함락될 때까지 게임이 진행 됩니다.\nplayer 1 부터 공격을 시작 합니다.")
+    print("\n상대의 배가 모두 함락될 때까지 게임이 진행 됩니다.\nplayer 1 부터 공격을 시작 합니다.")
     judge_of_success_or_failure_by_attack(grid_p1, grid_p2)
     print("게임 종료")
 
