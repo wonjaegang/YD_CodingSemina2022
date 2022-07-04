@@ -25,7 +25,8 @@ def input_attack_point():                                                       
 
 
 def put_the_battleship(grid):                                                           # 각각의 배를 배치
-    for _ in range(2, 6):
+    repeat = 0
+    while repeat < 4:
         x1, y1, x2, y2 = input_first_point_and_second_point()
         if x1 == x2:
             for i in range(min(y1, y2), max(y1, y2) + 1):
@@ -37,6 +38,7 @@ def put_the_battleship(grid):                                                   
             print("잘못된 배치 입니다. 다시 입력해 주세요.\n")
             continue
         print_grid(grid)
+        repeat += 1
     return grid
 
 
