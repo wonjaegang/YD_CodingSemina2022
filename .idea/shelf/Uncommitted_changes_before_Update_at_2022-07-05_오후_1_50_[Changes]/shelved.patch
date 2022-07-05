@@ -1,0 +1,12 @@
+Index: Q6/practicing2.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Q6/practicing2.py b/Q6/practicing2.py
+new file mode 100644
+--- /dev/null	(date 1656996406636)
++++ b/Q6/practicing2.py	(date 1656996406636)
+@@ -0,0 +1,2 @@
++for i in range(4):
++    head_x, head_y, tail_x, tail_y = map(int, input('배의 머리 좌표와 꼬리 좌표를 입력하시오.(배의 길이는 %d)' % (i+2)).split(','))
