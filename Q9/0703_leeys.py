@@ -5,12 +5,11 @@ def create_grid():                                                              
 
 def print_grid(grid):                                                                  # 격자 출력
     for i in grid:
-        for j in i:
-            if j == 6:
+        for index, j in enumerate(i):
+            if index == 6:
                 print(j)
             else:
                 print(j, end="  ")
-        print()
     print()
 
 
