@@ -40,7 +40,7 @@ def main():
     white = (255, 255, 255)
     black = (0, 0, 0)
     pygame.draw.circle(screen, white, [250, 250], 5)
-    pygame.draw.line(screen, white, [500, 500], [500, 0])
+    pygame.draw.line(screen, white, [500, 500], [500, 0], 10)
     for grid_width in range(10):
         for grid_height in range(10):
             pygame.draw.rect(screen, white, [500 + 50 * grid_width, 50 * grid_height, 50, 50], 1)
