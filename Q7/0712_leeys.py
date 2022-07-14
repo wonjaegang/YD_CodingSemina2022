@@ -33,21 +33,6 @@ def print_grid_map(sensor_data):
                 if j * 50 <= y_value < (j + 1) * 50:
                     grid[abs(j - 4)][i + 5] = 'X'
 
-    pygame.draw.circle(screen, (255, 255, 255), [250, 250], 5)
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            return
-
-    x = pygame.mouse.get_pos()[0] - 250
-    y = -pygame.mouse.get_pos()[1] + 250
-
-    sensor_data = virtual_lidar(x, y)
-    print_grid_map(sensor_data)
-
-    pygame.display.flip()
-    clock.tick(rate)
-
     print()  # <- 이 print() 한 줄은 그냥 장식, 이게 조금(?) 눈이 더 편한 것 같아서
 
     for i in grid:
