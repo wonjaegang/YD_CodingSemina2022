@@ -3,7 +3,7 @@ from math import*
 from pygame.locals import *
 
 pygame.init()
-screen = pygame.display.set_mode((500, 500))
+screen = pygame.display.set_mode((1000, 500))
 clock = pygame.time.Clock()
 rate = 50
 
@@ -16,7 +16,7 @@ def virtual_lidar(x, y):
     return data_list
 
 
-def print_grid_map(sensor_data):
+def print_grid_map(sensor_data, white, black):
     x_value = 0
     y_value = 0
     for index in range(len(sensor_data)):
@@ -26,39 +26,25 @@ def print_grid_map(sensor_data):
             y_value = sensor_data[index] * sin(radians(theta))
             break
 
-    grid = [['O' for _ in range(10)] for _ in range(10)]
     for i in range(-5, 5):
         for j in range(-5, 5):
-            if i * 50 <= x_value < (i + 1) * 50:
-                if j * 50 <= y_value < (j + 1) * 50:
-                    grid[abs(j - 4)][i + 5] = 'X'
-
-    pygame.draw.circle(screen, (255, 255, 255), [250, 250], 5)
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            return
-
-    x = pygame.mouse.get_pos()[0] - 250
-    y = -pygame.mouse.get_pos()[1] + 250
-
-    sensor_data = virtual_lidar(x, y)
-    print_grid_map(sensor_data)
-
-    pygame.display.flip()
-    clock.tick(rate)
-
-    print()  # <- 이 print() 한 줄은 그냥 장식, 이게 조금(?) 눈이 더 편한 것 같아서
-
-    for i in grid:
-        for j in i:
-            print(j, end='  ')
-        print()
+            if i * 50 <= x_value < (i + 1) * 50 and j * 50 <= y_value < (j + 1) * 50:
+                pygame.draw.rect(screen, white, [750 + i * 50, 250 - (j + 1) * 50, 50, 50])
+            else:
+                pygame.draw.rect(screen, black, [750 + i * 50, 250 - (j + 1) * 50, 50, 50])
+                pygame.draw.rect(screen, white, [750 + i * 50, 250 - (j + 1) * 50, 50, 50], 1)
     return 0
 
 
 def main():
-    pygame.draw.circle(screen, (255, 255, 255), [250, 250], 5)
+    white = (255, 255, 255)
+    black = (0, 0, 0)
+    pygame.draw.circle(screen, white, [250, 250], 5)
+    pygame.draw.line(screen, white, [500, 500], [500, 0])
+    for grid_width in range(10):
+        for grid_height in range(10):
+            pygame.draw.rect(screen, white, [500 + 50 * grid_width, 50 * grid_height, 50, 50], 1)
+
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -69,7 +55,7 @@ def main():
         y = -pygame.mouse.get_pos()[1] + 250
 
         sensor_data = virtual_lidar(x, y)
-        print_grid_map(sensor_data)
+        print_grid_map(sensor_data, white, black)
 
         pygame.display.flip()
         clock.tick(rate)
