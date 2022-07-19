@@ -1,20 +1,9 @@
-"""
-주어진 함수 print_grid_map() 을 완성해보자.
-
-print_grid_map()은 가상의 라이다 virtual_lidar() 로부터 1도의 간격으로 거리값이 담긴 길이 360개의 거리값을 배열로 받는다.
-그 후, 10X10 그리드맵을 출력한다. 장애물(마우스)가 존재하는 좌표는 X로, 아닌 좌표는 O로 나타내어보자.
-
-그리드맵의 실제크기는 500X500이며, 그리드맵의 중심에 라이다가 존재한다.
-중심기준 오른쪽 수평직선에서 0도로 시작하고, 반시계 방향으로 359까지 증가한다.
-
-단, print_grid_map() 에 인자로 주어진 sensor_data 의 값만 사용하자. 가공할 수 있는 값들은 sensor_data 의 360개의 값이 전부다.
-
-"""
-
 import pygame
 import math
 from math import*
 from pygame.locals import *
+import numpy as np
+import matplotlib.pyplot as plt
 
 pygame.init()
 screen = pygame.display.set_mode((500, 500))
@@ -36,10 +25,10 @@ def print_grid_map(sensor_data):
 
     for degree in range(360):
 
-        radian_num = math.radian(degree)
+        radian_num = math.radians(degree)
         radius = sensor_data[degree]
-        x = math.cos(radian_num) * radius
-        y = math.sin(radian_num) * radius
+        x = math.cos(radian_num) * radius + 250
+        y = math.sin(radian_num) * radius + 250
 
         if 0 < x <= 500 and 0 < y <= 500:
             if 0 < x <= 50:
@@ -89,6 +78,10 @@ def print_grid_map(sensor_data):
         for colomn in range(10):
             print(grid_map[row][colomn], end=" ")
         print()
+
+    print("\n")
+
+
 
     return 0
 
