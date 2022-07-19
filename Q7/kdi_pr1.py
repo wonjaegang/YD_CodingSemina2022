@@ -1,19 +1,62 @@
-import numpy as np
-x = np.linspace(1,10,10)
-y = np.linspace(11,20,10)
-X,Y = np.meshgrid(x,y)
-X
-Y
+import math
 
-import matplotlib.pyplot as plt
-plt.scatter(X,Y)
-plt.grid()
-x1,y1 = np.meshgrid(x,y)
-x2,y2 = np.meshigrid(x,y,indexing='ij')
+grid_map = [['◯' for _ in range(10)] for _ in range(10)]
 
-print(x1[0][1], x2[0][1])
+for degree in range(360):
 
-x2,y2 = np.meshgrid(x,y,sparse=True)
-x2
-x2.shape
-y2
+    radian_num = math.radian(degree)
+    radius = sensor_data[degree]
+    x = math.cos(radian_num) * radius
+    y = math.sin(radian_num) * radius
+
+    if 0 < x <= 500 and 0 < y <= 500:
+        if 0 < x <= 50:
+            j = 0
+        elif 50 < x <= 100:
+            j = 1
+        elif 100 < x <= 150:
+            j = 2
+        elif 150 < x <= 200:
+            j = 3
+        elif 200 < x <= 250:
+            j = 4
+        elif 250 < x <= 300:
+            j = 5
+        elif 300 < x <= 350:
+            j = 6
+        elif 350 < x <= 400:
+            j = 7
+        elif 400 < x <= 450:
+            j = 8
+        elif 450 < x <= 500:
+            j = 9
+
+        if 0 < y <= 50:
+            i = 9
+        elif 50 < y <= 100:
+            i = 8
+        elif 100 < y <= 150:
+            i = 7
+        elif 150 < y <= 200:
+            i = 6
+        elif 200 < y <= 250:
+            i = 5
+        elif 250 < y <= 300:
+            i = 4
+        elif 300 < y <= 350:
+            i = 3
+        elif 350 < y <= 400:
+            i = 2
+        elif 400 < y <= 450:
+            i = 1
+        elif 450 < y <= 500:
+            i = 0
+    grid_map[i][j] = 'X'
+
+for row in range(10):
+    for colomn in range(10):
+        print(grid_map[row][colomn], end=" ")
+    print()
+
+
+
