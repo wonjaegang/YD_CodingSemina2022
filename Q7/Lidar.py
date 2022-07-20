@@ -30,7 +30,22 @@ def virtual_lidar(x, y):
 
 
 def print_grid_map(sensor_data):
-    return 0
+    grid_map = [['O' for _ in range(10)] for _ in range(10)]
+
+    for degree, distance in enumerate(sensor_data):
+        if distance:
+            x = distance * cos(radians(degree))
+            y = distance * sin(radians(degree))
+            grid_h = int(-y + 250) // 50
+            grid_w = int(x + 250) // 50
+            if 0 <= grid_h < 10 and 0 <= grid_w < 10:
+                grid_map[grid_h][grid_w] = 'X'
+
+    print('=' * 50)
+    for line in grid_map:
+        for grid in line:
+            print(grid, end='  ')
+        print()
 
 
 def main():
