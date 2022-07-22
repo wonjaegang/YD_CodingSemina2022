@@ -15,6 +15,9 @@ import pygame
 from math import*
 from pygame.locals import *
 
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+
 pygame.init()
 WIDTH = 500
 HEIGHT = 500
@@ -24,13 +27,14 @@ rate = 50
 
 
 class Obstacle:
-    def __init__(self, CenterX, centerY, width, height):
-        self.rect = pygame.rect.Rect(0, 0, width, height)
-        self.rect.centerx = CenterX
-        self.rect.centery = 500 - centerY
+    def __init__(self, initial_location, size):
+        self.rect = pygame.rect.Rect(0, 0, *size)
+        self.x, self.y = initial_location
 
     def GUI_display(self):
-        pygame.draw.rect(screen, (0, 0, 0), self.rect)
+        self.rect.centerx = self.x
+        self.rect.centery = 500 - self.y
+        pygame.draw.rect(screen, BLACK, self.rect)
 
 
 # 주어진 속력과 방향에 따라 등속운동하는 자동차
@@ -44,9 +48,6 @@ class Car:
         self.size = 10
         self.rect = pygame.rect.Rect(0, 0, self.size, self.size)
 
-    def autonomous_drive(self):
-        pass
-
     def move(self):
         self.x += self.velocity * cos(self.direction)
         self.y += self.velocity * sin(self.direction)
@@ -54,7 +55,7 @@ class Car:
     def GUI_display(self):
         self.rect.centerx = self.x
         self.rect.centery = 500 - self.y
-        pygame.draw.rect(screen, (0, 0, 0), self.rect)
+        pygame.draw.rect(screen, BLACK, self.rect)
 
     def set_velocity(self):
         self.velocity = 1
@@ -62,10 +63,13 @@ class Car:
     def set_steer(self):
         self.direction = 3.141592 / 2
 
+    def Lidar(self):
+        pass
+
 
 def main():
     car = Car([250, 0])  # x, y
-    obstacle = Obstacle(250, 250, 50, 5)
+    obstacle = Obstacle([250, 250], [50, 10])  # (x, y), (width, height)
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -76,11 +80,7 @@ def main():
         car.set_steer()
         car.move()
 
-        if pygame.rect.Rect.colliderect(car.rect, obstacle.rect):
-            pygame.quit()
-            return 0
-
-        screen.fill((255, 255, 255))
+        screen.fill(WHITE)
         car.GUI_display()
         obstacle.GUI_display()
 
