@@ -57,27 +57,28 @@ class Car:
         self.rect.centery = 500 - self.y
         pygame.draw.rect(screen, BLACK, self.rect)
 
-    def set_velocity(self):
-        self.velocity = 1
+    def set_velocity(self, count):
+        self.velocity = 10
 
-    def set_steer(self):
-        self.direction = 3.141592 / 2
+    def set_steer(self, count):
+        self.direction = count / 100
 
     def Lidar(self):
         pass
 
 
 def main():
-    car = Car([250, 0])  # x, y
+    car = Car([250, 125])  # x, y
     obstacle = Obstacle([250, 250], [50, 10])  # (x, y), (width, height)
+    count = 0
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 return 0
 
-        car.set_velocity()
-        car.set_steer()
+        car.set_velocity(count)
+        car.set_steer(count)
         car.move()
 
         screen.fill(WHITE)
@@ -86,6 +87,7 @@ def main():
 
         pygame.display.flip()
         clock.tick(rate)
+        count += 1
 
 
 if __name__ == '__main__':
