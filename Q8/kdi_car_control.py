@@ -50,7 +50,8 @@ class Car:
 
     def set_steer(self, count):
         if count > 1:
-            if self.x + self.y == 200 or self.x + self.y == 500 or self.x + self.y == 800:
+            print(round(self.x + self.y))
+            if round(self.x + self.y) == 200 or round(self.x + self.y) == 500 or round(self.x + self.y) == 800:
                 self.direction += math.pi / 2
 
 
