@@ -48,6 +48,8 @@ class Car:
     def set_steer(self, count):
         if not (count + 15) % 30:
             self.direction += 0.5 * pi
+            if not self.direction % (2 * pi):
+                self.direction = 0
 
     def Lidar(self):
         pass
