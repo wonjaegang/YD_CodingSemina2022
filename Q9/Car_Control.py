@@ -1,4 +1,8 @@
 """
+굉장히 단순화된 자동차 모델이 있다.
+기준좌표계 기준 방향과 속도를 입력해주어 구동시킨다.
+좌표계의 좌측 하단이 0, 0 이다. 우측 방향이 x+, 위쪽 방향이 y+이다.
+
 자동차를 1) 정사각형 경로로 2) 랜덤 경로로 움직여보자.
 
 """
@@ -18,20 +22,9 @@ clock = pygame.time.Clock()
 rate = 50
 
 
-class Obstacle:
-    def __init__(self, initial_location, size):
-        self.rect = pygame.rect.Rect(0, 0, *size)
-        self.x, self.y = initial_location
-
-    def GUI_display(self):
-        self.rect.centerx = self.x
-        self.rect.centery = 500 - self.y
-        pygame.draw.rect(screen, BLACK, self.rect)
-
-
 # 주어진 속력과 방향에 따라 등속운동하는 자동차
 # 좌표계의 좌측 하단이 0, 0 이다. 우측 방향이 x+, 위쪽 방향이 y+.
-# direction 은 절대좌표계를 따른다.
+# direction 은 기준좌표계를 따른다.
 class Car:
     def __init__(self, initial_location):
         self.x, self.y = initial_location
@@ -56,13 +49,9 @@ class Car:
     def set_steer(self, count):
         self.direction = count / 100
 
-    def Lidar(self):
-        pass
-
 
 def main():
     car = Car([250, 125])  # x, y
-    obstacle = Obstacle([250, 250], [50, 10])  # (x, y), (width, height)
     count = 0
     while True:
         for event in pygame.event.get():
@@ -76,7 +65,6 @@ def main():
 
         screen.fill(WHITE)
         car.GUI_display()
-        obstacle.GUI_display()
 
         pygame.display.flip()
         clock.tick(rate)

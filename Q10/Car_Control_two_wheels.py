@@ -1,6 +1,9 @@
 """
 자동차는 이제 실제 차량과 점점 더 흡사해진다.
 차량은 각각 왼쪽/오른쪽 바퀴를 가지고 있으며, 각 바퀴의 속력을 설정해주어 구동시킨다.
+마찬가지로 좌표계의 좌측 하단이 0, 0 이다. 우측 방향이 x+, 위쪽 방향이 y+.
+
+자동차를  2) 반지름이 점점 줄어드는 나선경로로 움직여보자.  2) (425, 425)로 이동하고, 그 주변에 도착하면 정지하도록 코드를 짜보자.
 
 """
 
@@ -11,6 +14,8 @@ from pygame.locals import *
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
 
 pygame.init()
 WIDTH = 500
@@ -18,17 +23,6 @@ HEIGHT = 500
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 rate = 50
-
-
-class Obstacle:
-    def __init__(self, initial_location, size):
-        self.rect = pygame.rect.Rect(0, 0, *size)
-        self.x, self.y = initial_location
-
-    def GUI_display(self):
-        self.rect.centerx = self.x
-        self.rect.centery = 500 - self.y
-        pygame.draw.rect(screen, BLACK, self.rect)
 
 
 # 좌표계의 좌측 하단이 0, 0 이다. 우측 방향이 x+, 위쪽 방향이 y+
@@ -59,6 +53,9 @@ class Car:
         self.heading += d_theta
 
     def GUI_display(self):
+        pygame.draw.circle(screen, BLUE, [425, 500 - 425], 10)
+        pygame.draw.circle(screen, GREEN, [75, 500 - 75], 10)
+
         a = atan2(self.width, self.length)
         b = sqrt(self.length ** 2 + self.width ** 2) / 2
         corner1 = [self.x + cos(self.heading - a) * b, 500 - (self.y + sin(self.heading - a) * b)]
@@ -68,16 +65,12 @@ class Car:
         pygame.draw.polygon(screen, RED, [corner1, corner2, corner3, corner4])
 
     def set_motor_value(self, count):
-        self.right_wheel = 5
+        self.right_wheel = 0
         self.left_wheel = 0
-
-    def Lidar(self):
-        pass
 
 
 def main():
-    car = Car([250, 125])  # x, y
-    obstacle = Obstacle([250, 250], [50, 10])  # (x, y), (width, height)
+    car = Car([75, 75])  # x, y
     count = 0
     while True:
         for event in pygame.event.get():
@@ -90,7 +83,6 @@ def main():
 
         screen.fill(WHITE)
         car.GUI_display()
-        obstacle.GUI_display()
 
         pygame.display.flip()
         clock.tick(rate)
