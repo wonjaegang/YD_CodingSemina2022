@@ -49,17 +49,17 @@ class Car:
         pygame.draw.rect(screen, BLACK, self.rect)
 
     def set_velocity(self, count):
-        self.velocity = 1
+        self.velocity = 5
 
     def set_steer(self, count):
         print(count)
         if 0 < self.x < 500 and 0 < self.y < 500:
-            if count // 150 == 0:
+            if count % 50 == 0:
               self.direction = random.randrange(0, 7)
             else:
                 self.direction = self.direction
         else:
-            self.direction = abs(math.pi - self.direction)
+            self.direction += math.pi
 
     def Lidar(self):
         pass
