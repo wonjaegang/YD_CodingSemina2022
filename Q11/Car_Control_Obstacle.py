@@ -1,5 +1,6 @@
 """
 자동차는 이제 라이다를 갖게 되었다. 장애물을 회피해보자.
+라이다는 차량이 바라보는 방향에서 0도로 시작한다.
 장애물을 생성하는 txt 파일 또한 추가하였다.
 
 """
@@ -15,9 +16,13 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 
 pygame.init()
-WIDTH = 500
-HEIGHT = 500
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+X_MAX = 500
+Y_MAX = 500
+GRID_NUM_X = 10
+GRID_NUM_Y = 10
+GRID_SIZE_X = int(X_MAX / GRID_NUM_X)
+GRID_SIZE_Y = int(X_MAX / GRID_NUM_Y)
+screen = pygame.display.set_mode((X_MAX, Y_MAX))
 clock = pygame.time.Clock()
 rate = 100
 
@@ -29,19 +34,25 @@ class GridMap:
         self.map = list(map(lambda x: x.split('\n')[0].split(' '), self.map))
         self.starting_point = []
         self.goal_point = []
+        self.rect = []
+
         self.GUI_display()
 
     def GUI_display(self):
+        self.rect = []
         for row, line in enumerate(self.map):
             for column, ch in enumerate(line):
                 if ch == 'X':
-                    pygame.draw.rect(screen, BLACK, [50 * column, 50 * row, 50, 50])
+                    self.rect.append(pygame.Rect(GRID_SIZE_X * column, GRID_SIZE_Y * row, GRID_SIZE_X, GRID_SIZE_Y))
+                    pygame.draw.rect(screen, BLACK, self.rect[-1])
                 elif ch == '1':
-                    pygame.draw.circle(screen, GREEN, [50 * column + 25, 50 * row + 25], 10)
-                    self.starting_point = [50 * column + 25, 500 - (50 * row + 25)]
+                    pygame.draw.circle(screen, GREEN,
+                                       [int(GRID_SIZE_X * (column + 0.5)), int(GRID_SIZE_Y * (row + 0.5))], 10)
+                    self.starting_point = [int(GRID_SIZE_X * (column + 0.5)), int(Y_MAX - (GRID_SIZE_Y * (row + 0.5)))]
                 elif ch == '2':
-                    pygame.draw.circle(screen, BLUE, [50 * column + 25, 50 * row + 25], 10)
-                    self.goal_point = [50 * column + 25, 500 - (50 * row + 25)]
+                    pygame.draw.circle(screen, BLUE,
+                                       [int(GRID_SIZE_X * (column + 0.5)), int(GRID_SIZE_Y * (row + 0.5))], 10)
+                    self.goal_point = [int(GRID_SIZE_X * (column + 0.5)), int(Y_MAX - (GRID_SIZE_Y * (row + 0.5)))]
                 else:
                     pass
 
@@ -78,31 +89,55 @@ class Car:
     def GUI_display(self):
         a = atan2(self.width, self.length)
         b = sqrt(self.length ** 2 + self.width ** 2) / 2
-        corner1 = [self.x + cos(self.heading - a) * b, 500 - (self.y + sin(self.heading - a) * b)]
-        corner2 = [self.x + cos(self.heading + a) * b, 500 - (self.y + sin(self.heading + a) * b)]
-        corner3 = [self.x + cos(self.heading + pi - a) * b, 500 - (self.y + sin(self.heading + pi - a) * b)]
-        corner4 = [self.x + cos(self.heading + pi + a) * b, 500 - (self.y + sin(self.heading + pi + a) * b)]
+        corner1 = [self.x + cos(self.heading - a) * b, Y_MAX - (self.y + sin(self.heading - a) * b)]
+        corner2 = [self.x + cos(self.heading + a) * b, Y_MAX - (self.y + sin(self.heading + a) * b)]
+        corner3 = [self.x + cos(self.heading + pi - a) * b, Y_MAX - (self.y + sin(self.heading + pi - a) * b)]
+        corner4 = [self.x + cos(self.heading + pi + a) * b, Y_MAX - (self.y + sin(self.heading + pi + a) * b)]
         pygame.draw.polygon(screen, RED, [corner1, corner2, corner3, corner4])
 
-    def set_motor_value(self, count):
-        self.right_wheel = 2.3
-        self.left_wheel = 2
-
-    def LiDAR(self):
+    def LiDAR(self, obstacle_rect_list, resolution=6):
         data_list = [0.0 for _ in range(360)]
-        for direction in range(360):
-            angle = (self.heading + radians(direction)) % (pi * 2)
-            if atan2(HEIGHT - self.y, WIDTH - self.x) < angle <= atan2(HEIGHT - self.y, 0 - self.x):
-                final_point = [self.x + (HEIGHT - self.y) / tan(angle), HEIGHT]
-            elif atan2(HEIGHT - self.y, 0 - self.x) < angle <= atan2(0 - self.y, 0 - self.x) % (pi * 2):
-                final_point = [0, self.y + (0 - self.x) * tan(angle)]
-            elif atan2(0 - self.y, 0 - self.x) % (pi * 2) < angle <= atan2(0 - self.y, WIDTH - self.x) % (pi * 2):
-                final_point = [self.x + (0 - self.y) / tan(angle), 0]
-            else:
-                final_point = [WIDTH, self.y + (WIDTH - self.x) * tan(angle)]
-            pygame.draw.circle(screen, RED, list(map(lambda x: int(x), final_point)), 5)
-
+        # for direction in range(0, 360, resolution):
+        #     angle = (self.heading + radians(direction)) % (pi * 2)
+        #     for obstacle_rect in obstacle_rect_list:
+        #         xk = obstacle_rect.centerx
+        #         yk = obstacle_rect.centerx
+        #         k = (cos(angle) ** 2) * (xk - self.x + tan(angle) * (yk - self.y))
+        #         xp = self.x + k
+        #         yp = self.y + k * tan(angle)
+        #         if obstacle_rect.collidepoint(xp, yp):
+        #             if angle == 0:
+        #                 angle = 0.0000000000000000000000000001
+        #             cross = []
+        #             left = xk // GRID_SIZE_X * GRID_SIZE_X
+        #             bottom = yk // GRID_SIZE_Y * GRID_SIZE_Y
+        #             if bottom <= tan(angle) * (left - self.x) + self.y <= bottom + GRID_SIZE_Y:
+        #                 cross.append([left, tan(angle) * (left - self.x) + self.y])
+        #             if bottom <= tan(angle) * (left + GRID_SIZE_X - self.x) + self.y <= bottom + GRID_SIZE_Y:
+        #                 cross.append([left + GRID_SIZE_X, tan(angle) * (left + GRID_SIZE_X - self.x) + self.y])
+        #             if left <= (bottom - self.y) / tan(angle) + self.x <= left + GRID_SIZE_X:
+        #                 cross.append([bottom, (bottom - self.y) / tan(angle) + self.x])
+        #             if left <= (bottom + GRID_SIZE_Y - self.y) / tan(angle) + self.x <= left + GRID_SIZE_X:
+        #                 cross.append([bottom + GRID_SIZE_Y, (bottom + GRID_SIZE_Y - self.y) / tan(angle) + self.x])
+        #             distance = float('inf')
+        #             for point in cross:
+        #                 temp = sqrt((self.x - point[0]) ** 2 + (self.y - point[1]) ** 2)
+        #                 if temp < distance:
+        #                     distance = temp
+        #             data_list[direction] = distance
+        #
+        # for direction, data in enumerate(data_list):
+        #     if data:
+        #         if data != float('inf'):
+        #             pygame.draw.line(screen,
+        #                              RED,
+        #                              [self.x, 500 - self.y],
+        #                              [self.x + data * cos(radians(direction)), 500 - (self.y + data * sin(radians(direction)))])
         return data_list
+
+    def set_motor_value(self, count):
+        self.right_wheel = 0
+        self.left_wheel = 0
 
 
 def main():
@@ -122,7 +157,7 @@ def main():
         grid_map.GUI_display()
         car.GUI_display()
 
-        car.LiDAR()
+        # car.LiDAR(grid_map.rect)
 
         pygame.display.flip()
         clock.tick(rate)
