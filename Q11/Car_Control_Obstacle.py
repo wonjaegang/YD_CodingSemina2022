@@ -6,7 +6,8 @@
 """
 
 import pygame
-from math import*
+import itertools
+from math import *
 from pygame.locals import *
 
 WHITE = (255, 255, 255)
@@ -34,17 +35,17 @@ class GridMap:
         self.map = list(map(lambda x: x.split('\n')[0].split(' '), self.map))
         self.starting_point = []
         self.goal_point = []
-        self.rect = []
+        self.obstacles = []
 
         self.GUI_display()
 
     def GUI_display(self):
-        self.rect = []
+        self.obstacles = []
         for row, line in enumerate(self.map):
             for column, ch in enumerate(line):
                 if ch == 'X':
-                    self.rect.append(pygame.Rect(GRID_SIZE_X * column, GRID_SIZE_Y * row, GRID_SIZE_X, GRID_SIZE_Y))
-                    pygame.draw.rect(screen, BLACK, self.rect[-1])
+                    self.obstacles.append([column, GRID_NUM_Y - row - 1])
+                    pygame.draw.rect(screen, BLACK, (GRID_SIZE_X * column, GRID_SIZE_Y * row, GRID_SIZE_X, GRID_SIZE_Y))
                 elif ch == '1':
                     pygame.draw.circle(screen, GREEN,
                                        [int(GRID_SIZE_X * (column + 0.5)), int(GRID_SIZE_Y * (row + 0.5))], 10)
@@ -72,6 +73,8 @@ class Car:
         self.right_wheel = 0
         self.left_wheel = 0
 
+        self.LiDAR_data = []
+
     def get_velocity(self):
         r = self.wheel_radius
         L = self.tread / 2
@@ -95,49 +98,56 @@ class Car:
         corner4 = [self.x + cos(self.heading + pi + a) * b, Y_MAX - (self.y + sin(self.heading + pi + a) * b)]
         pygame.draw.polygon(screen, RED, [corner1, corner2, corner3, corner4])
 
-    def LiDAR(self, obstacle_rect_list, resolution=6):
+    def LiDAR(self, obstacles, resolution=6):
         data_list = [0.0 for _ in range(360)]
-        # for direction in range(0, 360, resolution):
-        #     angle = (self.heading + radians(direction)) % (pi * 2)
-        #     for obstacle_rect in obstacle_rect_list:
-        #         xk = obstacle_rect.centerx
-        #         yk = obstacle_rect.centerx
-        #         k = (cos(angle) ** 2) * (xk - self.x + tan(angle) * (yk - self.y))
-        #         xp = self.x + k
-        #         yp = self.y + k * tan(angle)
-        #         if obstacle_rect.collidepoint(xp, yp):
-        #             if angle == 0:
-        #                 angle = 0.0000000000000000000000000001
-        #             cross = []
-        #             left = xk // GRID_SIZE_X * GRID_SIZE_X
-        #             bottom = yk // GRID_SIZE_Y * GRID_SIZE_Y
-        #             if bottom <= tan(angle) * (left - self.x) + self.y <= bottom + GRID_SIZE_Y:
-        #                 cross.append([left, tan(angle) * (left - self.x) + self.y])
-        #             if bottom <= tan(angle) * (left + GRID_SIZE_X - self.x) + self.y <= bottom + GRID_SIZE_Y:
-        #                 cross.append([left + GRID_SIZE_X, tan(angle) * (left + GRID_SIZE_X - self.x) + self.y])
-        #             if left <= (bottom - self.y) / tan(angle) + self.x <= left + GRID_SIZE_X:
-        #                 cross.append([bottom, (bottom - self.y) / tan(angle) + self.x])
-        #             if left <= (bottom + GRID_SIZE_Y - self.y) / tan(angle) + self.x <= left + GRID_SIZE_X:
-        #                 cross.append([bottom + GRID_SIZE_Y, (bottom + GRID_SIZE_Y - self.y) / tan(angle) + self.x])
-        #             distance = float('inf')
-        #             for point in cross:
-        #                 temp = sqrt((self.x - point[0]) ** 2 + (self.y - point[1]) ** 2)
-        #                 if temp < distance:
-        #                     distance = temp
-        #             data_list[direction] = distance
-        #
+        for direction in range(0, 360, resolution):
+            angle = (self.heading + radians(direction)) % (pi * 2)
+            x_positive = False if pi / 2 <= angle < pi / 2 * 3 else True
+            y_positive = True if 0 <= angle < pi else False
+            distance = []
+            x_index = self.x // GRID_SIZE_X + x_positive
+            while True:
+                if x_index == GRID_NUM_X * x_positive:
+                    break
+                else:
+                    x_value = x_index * GRID_SIZE_X
+                    y_value = tan(angle) * (x_value - self.x) + self.y
+                    y_index = y_value // GRID_SIZE_Y
+                    if not 0 < y_index < GRID_NUM_Y:
+                        break
+                    if [x_index + x_positive - 1, y_index] in obstacles:
+                        distance.append(sqrt((x_value - self.x) ** 2 + (y_value - self.y) ** 2))
+                        break
+                    x_index += x_positive * 2 - 1
+
+            y_index = self.y // GRID_SIZE_Y + y_positive
+            while True:
+                if y_index == GRID_NUM_Y * y_positive:
+                    break
+                else:
+                    y_value = y_index * GRID_SIZE_Y
+                    x_value = (y_value - self.y) / tan(angle) + self.x if tan(angle) else X_MAX
+                    x_index = x_value // GRID_SIZE_X
+                    if not 0 < x_index < GRID_NUM_X:
+                        break
+                    if [x_index, y_index + y_positive - 1] in obstacles:
+                        distance.append(sqrt((x_value - self.x) ** 2 + (y_value - self.y) ** 2))
+                        break
+                    y_index += y_positive * 2 - 1
+            data_list[direction] = min(distance) if distance else 0
+
         # for direction, data in enumerate(data_list):
         #     if data:
-        #         if data != float('inf'):
-        #             pygame.draw.line(screen,
-        #                              RED,
-        #                              [self.x, 500 - self.y],
-        #                              [self.x + data * cos(radians(direction)), 500 - (self.y + data * sin(radians(direction)))])
-        return data_list
+        #         pygame.draw.line(screen,
+        #                          RED,
+        #                          [self.x, Y_MAX - self.y],
+        #                          [self.x + data * cos(self.heading + radians(direction)),
+        #                           Y_MAX - (self.y + data * sin(self.heading + radians(direction)))])
+        self.LiDAR_data = data_list
 
     def set_motor_value(self, count):
-        self.right_wheel = 0
-        self.left_wheel = 0
+        self.right_wheel = 4.4
+        self.left_wheel = 4
 
 
 def main():
@@ -150,14 +160,13 @@ def main():
                 pygame.quit()
                 return 0
 
+        car.LiDAR(grid_map.obstacles)
         car.set_motor_value(count)
         car.move()
 
         screen.fill(WHITE)
         grid_map.GUI_display()
         car.GUI_display()
-
-        # car.LiDAR(grid_map.rect)
 
         pygame.display.flip()
         clock.tick(rate)
