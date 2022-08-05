@@ -19,7 +19,6 @@ rate = 100
 GOAL = [[300, 300], [425, 425], [75, 75]]
 
 
-# 좌표계의 좌측 하단이 0, 0 이다. 우측 방향이 x+, 위쪽 방향이 y+
 class Car:
     def __init__(self, initial_location):
         self.x, self.y = initial_location
@@ -71,15 +70,12 @@ class Car:
             self.left_wheel = 0
             self.right_wheel = 0
         else:
-            if count > 10:
-                for i in range(3):
-                    if self.course == i and abs(GOAL[i][1] - self.x) <= 1 and abs(GOAL[i][0] - self.y) <= 1:
-                        self.left_wheel = 0
-                        self.right_wheel = 0
-                        sleep(1)
-                        self.course = i + 1
-                    else:
-                        pass
+            for i in range(3):
+                if self.course == i and abs(GOAL[i][1] - self.x) <= 1 and abs(GOAL[i][0] - self.y) <= 1:
+                    self.left_wheel = 0
+                    self.right_wheel = 0
+                    sleep(1)
+                    self.course = i + 1
 
             angle_difference_abs = 0
             for i in range(3):
@@ -92,6 +88,7 @@ class Car:
             else:
                 velocity_change = abs(angle_difference_to_goal) * \
                                   (self.max_velocity - self.min_velocity) / (0.5 * pi - 0) + self.min_velocity
+                # ↑ 매우 짧은 순간에 0도 부터 90도를 x, V_min 부터 V_max 까지를 y로 하는 하는 1차 함수의 x값(현재 각)에 대한 y 절편 ↑
 
             if 0 <= angle_difference_to_goal:
                 self.left_wheel = self.min_velocity
