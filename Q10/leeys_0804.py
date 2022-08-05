@@ -43,6 +43,7 @@ class Car:
         self.heading = 0
         self.right_wheel = 0
         self.left_wheel = 0
+        self.course = 0
 
     def get_velocity(self):
         r = self.wheel_radius
@@ -72,11 +73,21 @@ class Car:
         pygame.draw.polygon(screen, RED, [corner1, corner2, corner3, corner4])
 
     def set_motor_value(self, count):
-        angle_difference_relative = atan2(GOAL[0][0] - self.y, GOAL[0][1] - self.x)          # 목표 까지의 상대 각도 차이
+        if abs(GOAL[0][1] - self.x) <= 1 and abs(GOAL[0][0] - self.y) <= 1:
+            self.course = 1
+        elif abs(GOAL[1][1] - self.x) <= 1 and abs(GOAL[1][0] - self.y) <= 1:
+            self.course = 2
+
+        if self.course == 0:
+            angle_difference_relative = atan2(GOAL[0][0] - self.y, GOAL[0][1] - self.x)      # 목표 까지의 상대 각도 차이
+        elif self.course == 1:
+            angle_difference_relative = atan2(GOAL[1][0] - self.y, GOAL[1][1] - self.x)
+        else:
+            angle_difference_relative = atan2(GOAL[2][0] - self.y, GOAL[2][1] - self.x)
         angle_difference_to_goal = angle_difference_relative - self.heading
         velocity_change = angle_difference_to_goal * (0.4 - 0.3) / (0.25 * pi - 0) + 0.3    # x : 각도 차이, y : 속도 차이
-
-        if 0 <= angle_difference_to_goal:
+        print(angle_difference_to_goal,"    ", velocity_change)
+        if 0 <= angle_difference_to_goal % (2 * pi):
             self.left_wheel = 0.3
             self.right_wheel = velocity_change
         else:
