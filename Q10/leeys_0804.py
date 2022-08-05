@@ -66,7 +66,7 @@ class Car:
         pygame.draw.polygon(screen, RED, [corner1, corner2, corner3, corner4])
 
     def set_motor_value(self, count):
-        if self.course == 3:
+        if self.course == 3:         # 출발 지점 으로 다시 되돌아 왔는지 에 대한 판단
             self.left_wheel = 0
             self.right_wheel = 0
         else:
@@ -88,7 +88,7 @@ class Car:
             else:
                 velocity_change = abs(angle_difference_to_goal) * \
                                   (self.max_velocity - self.min_velocity) / (0.5 * pi - 0) + self.min_velocity
-                # ↑ 매우 짧은 순간에 0도 부터 90도를 x, V_min 부터 V_max 까지를 y로 하는 하는 1차 함수의 x값(현재 각)에 대한 y 절편 ↑
+                # ↑ 0도 부터 90도를 x, V_min 부터 V_max 까지를 y로 하는 하는 1차 함수의 x값(현재 각)에 대한 y 절편 ↑
 
             if 0 <= angle_difference_to_goal:
                 self.left_wheel = self.min_velocity
