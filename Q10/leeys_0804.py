@@ -1,18 +1,7 @@
-"""
-자동차는 이제 실제 차량과 점점 더 흡사해진다.
-차량은 각각 왼쪽/오른쪽 바퀴를 가지고 있으며, 각 바퀴의 속력을 설정해주어 구동시킨다.
-마찬가지로 좌표계의 좌측 하단이 0, 0 이다. 우측 방향이 x+, 위쪽 방향이 y+.
-
-자동차를  (300,300)로 이동하고, 그 주변에 도착하면 정차한 후,(맘대로)
-        (425, 425)로 이동하고, 그 주변에 도착하면 정차한 후,
-        (75, 75)로 복귀하도록 코드를 짜보자.
-        제자리회전 금지 >_<
-
-"""
-
 import pygame
 from math import*
 from pygame.locals import *
+from time import sleep
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -27,7 +16,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 rate = 100
 
-GOAL = [[400, 120], [425, 425], [75, 75]]
+GOAL = [[300, 300], [425, 425], [75, 75]]
 
 
 # 좌표계의 좌측 하단이 0, 0 이다. 우측 방향이 x+, 위쪽 방향이 y+
@@ -43,7 +32,12 @@ class Car:
         self.heading = 0
         self.right_wheel = 0
         self.left_wheel = 0
+
+        # ↓ 여기서 부터 연석 추가 ↓
         self.course = 0
+        self.min_velocity = 0.5
+        self.max_velocity = 0.7
+        # ↑     여기 까지       ↑
 
     def get_velocity(self):
         r = self.wheel_radius
@@ -61,7 +55,7 @@ class Car:
 
     def GUI_display(self):
         pygame.draw.circle(screen, GREEN, [75, 500 - 75], 10)
-        pygame.draw.circle(screen, BLUE, [120, 500 - 400], 10)
+        pygame.draw.circle(screen, BLUE, [300, 500 - 300], 10)
         pygame.draw.circle(screen, BLUE, [425, 500 - 425], 10)
 
         a = atan2(self.width, self.length)
@@ -73,26 +67,38 @@ class Car:
         pygame.draw.polygon(screen, RED, [corner1, corner2, corner3, corner4])
 
     def set_motor_value(self, count):
-        if abs(GOAL[0][1] - self.x) <= 1 and abs(GOAL[0][0] - self.y) <= 1:
-            self.course = 1
-        elif abs(GOAL[1][1] - self.x) <= 1 and abs(GOAL[1][0] - self.y) <= 1:
-            self.course = 2
+        if self.course == 3:
+            self.left_wheel = 0
+            self.right_wheel = 0
+        else:
+            if count > 10:
+                for i in range(3):
+                    if self.course == i and abs(GOAL[i][1] - self.x) <= 1 and abs(GOAL[i][0] - self.y) <= 1:
+                        self.left_wheel = 0
+                        self.right_wheel = 0
+                        sleep(1)
+                        self.course = i + 1
+                    else:
+                        pass
 
-        if self.course == 0:
-            angle_difference_relative = atan2(GOAL[0][0] - self.y, GOAL[0][1] - self.x)      # 목표 까지의 상대 각도 차이
-        elif self.course == 1:
-            angle_difference_relative = atan2(GOAL[1][0] - self.y, GOAL[1][1] - self.x)
-        else:
-            angle_difference_relative = atan2(GOAL[2][0] - self.y, GOAL[2][1] - self.x)
-        angle_difference_to_goal = angle_difference_relative - self.heading
-        velocity_change = angle_difference_to_goal * (0.4 - 0.3) / (0.25 * pi - 0) + 0.3    # x : 각도 차이, y : 속도 차이
-        print(angle_difference_to_goal,"    ", velocity_change)
-        if 0 <= angle_difference_to_goal % (2 * pi):
-            self.left_wheel = 0.3
-            self.right_wheel = velocity_change
-        else:
-            self.left_wheel = velocity_change
-            self.right_wheel = 0.3
+            angle_difference_abs = 0
+            for i in range(3):
+                if self.course == i:
+                    angle_difference_abs = atan2(GOAL[i][0] - self.y, GOAL[i][1] - self.x)
+
+            angle_difference_to_goal = angle_difference_abs - self.heading
+            if abs(angle_difference_to_goal) > 0.5 * pi:
+                velocity_change = self.max_velocity
+            else:
+                velocity_change = abs(angle_difference_to_goal) * \
+                                  (self.max_velocity - self.min_velocity) / (0.5 * pi - 0) + self.min_velocity
+
+            if 0 <= angle_difference_to_goal:
+                self.left_wheel = self.min_velocity
+                self.right_wheel = velocity_change
+            else:
+                self.left_wheel = velocity_change
+                self.right_wheel = self.min_velocity
 
 
 def main():
