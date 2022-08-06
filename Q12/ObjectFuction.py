@@ -38,3 +38,21 @@ ex)
 ->
 61
 """
+
+
+def calculate_cost(w1, w2, w3, num):
+    cost1 = (num % 10) / 9
+    cost2 = abs(50 - num) / 50
+    cost3 = 1 - num % 2
+    return w1 * cost1 + w2 * cost2 + w3 * cost3
+
+
+def main():
+    nums = list(map(int, input().split(' ')))
+    weights = list(map(float, input().split(' ')))
+
+    print(min(list(map(lambda x: [calculate_cost(*weights, x), x], nums)), key=lambda x: x[0])[1])
+
+
+if __name__ == '__main__':
+    main()

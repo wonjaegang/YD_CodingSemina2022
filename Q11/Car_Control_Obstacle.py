@@ -3,10 +3,11 @@
 라이다는 차량이 바라보는 방향에서 0도로 시작한다.
 장애물을 생성하는 txt 파일 또한 추가하였다.
 
+Q. 협로주행을 통해 목적에 도달하자.
+
 """
 
 import pygame
-import itertools
 from math import *
 from pygame.locals import *
 
@@ -15,10 +16,11 @@ BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
 
 pygame.init()
-X_MAX = 500
-Y_MAX = 500
+X_MAX = 1000
+Y_MAX = 1000
 GRID_NUM_X = 10
 GRID_NUM_Y = 10
 GRID_SIZE_X = int(X_MAX / GRID_NUM_X)
@@ -75,16 +77,16 @@ class Car:
 
         self.LiDAR_data = []
 
-    def get_velocity(self):
+    def get_velocity(self, heading, right_wheel, left_wheel):
         r = self.wheel_radius
         L = self.tread / 2
-        d_x = cos(self.heading) * r * 0.5 * (self.right_wheel + self.left_wheel)
-        d_y = sin(self.heading) * r * 0.5 * (self.right_wheel + self.left_wheel)
-        d_theta = r * 0.5 * (self.right_wheel - self.left_wheel) / L
+        d_x = cos(heading) * r * 0.5 * (right_wheel + left_wheel)
+        d_y = sin(heading) * r * 0.5 * (right_wheel + left_wheel)
+        d_theta = r * 0.5 * (right_wheel - left_wheel) / L
         return d_x, d_y, d_theta
 
     def move(self):
-        d_x, d_y, d_theta = self.get_velocity()
+        d_x, d_y, d_theta = self.get_velocity(self.heading, self.right_wheel, self.left_wheel)
         self.x += d_x
         self.y += d_y
         self.heading += d_theta
@@ -98,7 +100,7 @@ class Car:
         corner4 = [self.x + cos(self.heading + pi + a) * b, Y_MAX - (self.y + sin(self.heading + pi + a) * b)]
         pygame.draw.polygon(screen, RED, [corner1, corner2, corner3, corner4])
 
-    def LiDAR(self, obstacles, resolution=6):
+    def LiDAR(self, obstacles, resolution=1):
         data_list = [0.0 for _ in range(360)]
         for direction in range(0, 360, resolution):
             angle = (self.heading + radians(direction)) % (pi * 2)
@@ -146,8 +148,12 @@ class Car:
         self.LiDAR_data = data_list
 
     def set_motor_value(self, count):
-        self.right_wheel = 4.4
-        self.left_wheel = 4
+        if self.LiDAR_data[0] < 100:
+            self.right_wheel = 0
+            self.left_wheel = 0
+        else:
+            self.right_wheel = 2
+            self.left_wheel = 2
 
 
 def main():
@@ -160,13 +166,13 @@ def main():
                 pygame.quit()
                 return 0
 
-        car.LiDAR(grid_map.obstacles)
-        car.set_motor_value(count)
-        car.move()
-
         screen.fill(WHITE)
         grid_map.GUI_display()
         car.GUI_display()
+
+        car.LiDAR(grid_map.obstacles)
+        car.set_motor_value(count)
+        car.move()
 
         pygame.display.flip()
         clock.tick(rate)
