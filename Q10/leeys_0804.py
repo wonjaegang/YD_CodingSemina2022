@@ -82,7 +82,17 @@ class Car:
                 if self.course == i:
                     angle_difference_abs = atan2(GOAL[i][0] - self.y, GOAL[i][1] - self.x)
 
+            if self.heading >= 2 * pi:
+                self.heading = self.heading % (2 * pi)
+            elif self.heading <= -2 * pi:
+                self.heading = self.heading % (-2 * pi)
+
             angle_difference_to_goal = angle_difference_abs - self.heading
+            if angle_difference_to_goal >= pi:
+                angle_difference_to_goal = 2 * pi - angle_difference_to_goal
+            elif angle_difference_to_goal <= -pi:
+                angle_difference_to_goal = 2 * pi + angle_difference_to_goal
+
             if abs(angle_difference_to_goal) > 0.5 * pi:
                 velocity_change = self.max_velocity
             else:
