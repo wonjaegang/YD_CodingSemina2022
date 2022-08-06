@@ -32,7 +32,7 @@ GOAL = [[300, 300], [425, 425], [75, 75]]
 
 # 좌표계의 좌측 하단이 0, 0 이다. 우측 방향이 x+, 위쪽 방향이 y+
 class Car:
-    def __init__(self, initial_location):
+    def __init__(self, initial_location, count):
         self.x, self.y = initial_location
 
         self.length = 15
@@ -43,6 +43,9 @@ class Car:
         self.heading = 0
         self.right_wheel = 0
         self.left_wheel = 0
+
+        if self.right_wheel == 0 and self.left_wheel == 0:
+            self.first_count = count
 
     def get_velocity(self):
         r = self.wheel_radius
@@ -80,18 +83,23 @@ class Car:
 
         print(x_coordinate, y_coordinate)
         print(count)
+        print(self.first_count)
 
         self.right_wheel = 2.3
         self.left_wheel = 2.2
 
         if x_1-10 < x_coordinate < x_1+10 and y_1-10 < y_coordinate < y_1+10:
-            w_count = count
             self.right_wheel = 0
             self.left_wheel = 0
-            print(w_count)
+            self.first_count = count
+            if self.first_count + 50 < count:
+                self.right_wheel = 2.5
+                self.left_wheel = 2.7
+
 def main():
     car = Car([75, 75])  # x, y
     count = 0
+    car.first_count = count
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
