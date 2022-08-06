@@ -34,8 +34,10 @@ class Car:
 
         # ↓ 여기서 부터 연석 추가 ↓
         self.course = 0
-        self.min_velocity = 0.5
-        self.max_velocity = 0.7
+        self.min_velocity = 2
+        self.max_velocity = 2.5
+        self.count = 0
+        self.arrive = False
         # ↑     여기 까지       ↑
 
     def get_velocity(self):
@@ -71,11 +73,20 @@ class Car:
             self.right_wheel = 0
         else:
             for i in range(3):
-                if self.course == i and abs(GOAL[i][1] - self.x) <= 1 and abs(GOAL[i][0] - self.y) <= 1:
+                if self.course == i and abs(GOAL[i][1] - self.x) <= 10 and abs(GOAL[i][0] - self.y) <= 10:
                     self.left_wheel = 0
                     self.right_wheel = 0
-                    sleep(1)
-                    self.course = i + 1
+                    print(1)
+                    if not self.arrive:
+                        self.arrive = True
+                        self.count = count
+                        return
+                    else:
+                        if count - self.count == 100:
+                            self.arrive = False
+                            self.course = i + 1
+                        else:
+                            return
 
             angle_difference_abs = 0
             for i in range(3):
