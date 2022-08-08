@@ -139,41 +139,41 @@ class Car:
         self.LiDAR_data = data_list
 
     def set_motor_value(self, count):
-        if abs(self.goal_x - self.x) <= 5 and abs(self.goal_y - self.y) <= 5:
+        if abs(self.goal_x - self.x) <= 10 and abs(self.goal_y - self.y) <= 10:
             self.right_wheel = 0
             self.left_wheel = 0
             return
 
-        front_data = self.LiDAR_data[266:] + self.LiDAR_data[:95]
+        front_data = self.LiDAR_data[266:] + self.LiDAR_data[:95]  # (266 ~ 359 데이터) + (0 ~ 94 데이터) = 189 개의 데이터
         avg_front_data = [0.0 for _ in range(181)]
         for i in range(181):
-            avg_front_data[i] = round(sum(front_data[i:(i + 9)]) / 9, 2)
+            avg_front_data[i] = round(sum(front_data[i:(i + 9)]) / 9, 2)  # 주변 10개 데이터 의 평균을 낸 181 개의 평균 데이터
         theta = avg_front_data.index(max(avg_front_data))
 
-        r_cost1, l_cost1, r_cost2, l_cost2, total_r_cost, total_l_cost = 0, 0, 0, 0, 0, 0
+        r_w1, l_w1, r_w2, l_w2, total_r_w, total_l_w = 0, 0, 0, 0, 0, 0
         if theta <= 90:
-            l_cost1 = theta / 90
+            l_w1 = theta / 90
         else:
-            r_cost1 = (theta - 90) / 90
+            r_w1 = (theta - 90) / 90
 
         if 0 < avg_front_data[0] - avg_front_data[180]:
-            l_cost2 = abs(avg_front_data[0] - avg_front_data[180]) / 200
-            if 1 < l_cost2:
-                l_cost2 = 1
+            l_w2 = abs(avg_front_data[0] - avg_front_data[180]) / 300
+            if 1 < l_w2:
+                l_w2 = 1
         else:
-            r_cost2 = abs(avg_front_data[0] - avg_front_data[180]) / 200
-            if 1 < r_cost2:
-                r_cost2 = 1
+            r_w2 = abs(avg_front_data[0] - avg_front_data[180]) / 300
+            if 1 < r_w2:
+                r_w2 = 1
 
         for i in range(9):
             if 90 - 10 * (i + 1) < theta <= 90 - 10 * i or 90 + 10 * i < theta <= 90 + 10 * (i + 1):
-                total_r_cost = 0.125 * i * r_cost1 + (1 - 0.125 * i) * r_cost2
-                total_l_cost = 0.125 * i * l_cost1 + (1 - 0.125 * i) * l_cost2
+                total_r_w = 1 / 8 * i * r_w1 + (1 - 1 / 8 * i) * r_w2
+                total_l_w = 1 / 8 * i * l_w1 + (1 - 1 / 8 * i) * l_w2
 
-        changing_velocity_right = total_r_cost * (2 * self.speed - self.speed) + self.speed
-        changing_velocity_left = total_l_cost * (2 * self.speed - self.speed) + self.speed
-        self.right_wheel = changing_velocity_right
-        self.left_wheel = changing_velocity_left
+        r_cost = total_r_w * (2 * self.speed - self.speed) + self.speed
+        l_cost = total_l_w * (2 * self.speed - self.speed) + self.speed
+        self.right_wheel = r_cost
+        self.left_wheel = l_cost
 
 
 def main():
