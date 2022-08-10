@@ -44,6 +44,10 @@ class Car:
         self.right_wheel = 0
         self.left_wheel = 0
 
+        self.trigger = 2
+        self.goal = 0
+        self.decision = False
+
     def get_velocity(self):
         r = self.wheel_radius
         L = self.tread / 2
@@ -72,19 +76,44 @@ class Car:
         pygame.draw.polygon(screen, RED, [corner1, corner2, corner3, corner4])
 
     def set_motor_value(self, count):
-        if GOAL[0][0] > round(self.heading * (GOAL[0][1] - self.x) + self.y):
-            self.right_wheel = 1.1
-            self.left_wheel = 1
-        elif GOAL[0][0] == round(self.heading * (GOAL[0][1] - self.x) + self.y):
-            self.right_wheel = 1
-            self.left_wheel = 1
-        else:
-            self.right_wheel = 1
-            self.left_wheel = 1.1
+        print(self.goal)
 
-        if abs(GOAL[0][1] - round(self.y)) < 5:
+        if self.heading < (-pi / 2):
+            self.heading = abs(self.heading) - (pi / 2)
+
+        if self.goal == 3:
             self.right_wheel = 0
             self.left_wheel = 0
+
+        else:
+            if not self.decision:
+                if GOAL[self.goal][0] > round(self.heading * (GOAL[self.goal][1] - self.x) + self.y):
+                    self.right_wheel = 1.1
+                    self.left_wheel = 1
+
+                elif GOAL[self.goal][0] == round(self.heading * (GOAL[self.goal][1] - self.x) + self.y):
+                    self.right_wheel = 1
+                    self.left_wheel = 1
+
+                elif GOAL[self.goal][0] < round(self.heading * (GOAL[self.goal][1] - self.x) + self.y):
+                    self.right_wheel = 1
+                    self.left_wheel = 1.1
+
+                if abs(GOAL[self.goal][1] - round(self.y)) < 5:
+                    self.decision = True
+                    return
+            else:
+                print("goal")
+                self.right_wheel = 0
+                self.left_wheel = 0
+
+                self.trigger += 1
+                print(self.trigger)
+
+                if self.trigger % 100 == 0:
+                    self.decision = False
+                    self.goal += 1
+                    return
 
         print(round(self.x), round(self.y), self.heading)
 
