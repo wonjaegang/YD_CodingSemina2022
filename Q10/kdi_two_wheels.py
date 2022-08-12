@@ -9,7 +9,7 @@
         제자리회전 금지 >_<
 
 """
-
+import math
 import pygame
 from math import*
 from pygame.locals import *
@@ -76,10 +76,11 @@ class Car:
         pygame.draw.polygon(screen, RED, [corner1, corner2, corner3, corner4])
 
     def set_motor_value(self, count):
-        print(self.goal)
 
-        if self.heading < (-pi / 2):
-            self.heading = abs(self.heading) - (pi / 2)
+        # 기울기
+        lean = math.tan(self.heading)
+
+        print(self.goal)
 
         if self.goal == 3:
             self.right_wheel = 0
@@ -87,21 +88,25 @@ class Car:
 
         else:
             if not self.decision:
-                if GOAL[self.goal][0] > round(self.heading * (GOAL[self.goal][1] - self.x) + self.y):
-                    self.right_wheel = 1.1
-                    self.left_wheel = 1
+                if GOAL[self.goal][1] > round(lean * (GOAL[self.goal][0] - self.x) + self.y):
+                    self.right_wheel = 2.5
+                    self.left_wheel = 2
+                    print("111111111111111")
 
-                elif GOAL[self.goal][0] == round(self.heading * (GOAL[self.goal][1] - self.x) + self.y):
-                    self.right_wheel = 1
-                    self.left_wheel = 1
+                elif GOAL[self.goal][1] == round(lean * (GOAL[self.goal][0] - self.x) + self.y):
+                    self.right_wheel = 3
+                    self.left_wheel = 3
+                    print("3333333333333333")
 
-                elif GOAL[self.goal][0] < round(self.heading * (GOAL[self.goal][1] - self.x) + self.y):
-                    self.right_wheel = 1
-                    self.left_wheel = 1.1
+                elif GOAL[self.goal][1] < round(lean * (GOAL[self.goal][0] - self.x) + self.y):
+                    self.right_wheel = 2
+                    self.left_wheel = 2.5
+                    print("2222222222222")
 
                 if abs(GOAL[self.goal][1] - round(self.y)) < 5:
                     self.decision = True
                     return
+
             else:
                 print("goal")
                 self.right_wheel = 0
@@ -115,7 +120,7 @@ class Car:
                     self.goal += 1
                     return
 
-        print(round(self.x), round(self.y), self.heading)
+        print(round(self.x), round(self.y), lean)
 
 
 def main():
