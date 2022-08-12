@@ -1,7 +1,6 @@
 import pygame
 from math import*
 from pygame.locals import *
-from time import sleep
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -16,7 +15,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 rate = 100
 
-GOAL = [[300, 300], [425, 425], [75, 75]]
+GOAL = [[425, 425], [50, 60], [275, 121]]
 
 
 class Car:
@@ -35,7 +34,7 @@ class Car:
         # ↓ 여기서 부터 연석 추가 ↓
         self.course = 0
         self.min_velocity = 2
-        self.max_velocity = 2.5
+        self.max_velocity = 3
         self.count = 0
         self.arrive = False
         # ↑     여기 까지       ↑
@@ -55,9 +54,9 @@ class Car:
         self.heading += d_theta
 
     def GUI_display(self):
-        pygame.draw.circle(screen, GREEN, [75, 500 - 75], 10)
-        pygame.draw.circle(screen, BLUE, [300, 500 - 300], 10)
-        pygame.draw.circle(screen, BLUE, [425, 500 - 425], 10)
+        pygame.draw.circle(screen, GREEN, [GOAL[2][1], 500 - GOAL[2][0]], 10)
+        pygame.draw.circle(screen, BLUE, [GOAL[0][1], 500 - GOAL[0][0]], 10)
+        pygame.draw.circle(screen, BLUE, [GOAL[1][1], 500 - GOAL[1][0]], 10)
 
         a = atan2(self.width, self.length)
         b = sqrt(self.length ** 2 + self.width ** 2) / 2
@@ -73,10 +72,9 @@ class Car:
             self.right_wheel = 0
         else:
             for i in range(3):
-                if self.course == i and abs(GOAL[i][1] - self.x) <= 10 and abs(GOAL[i][0] - self.y) <= 10:
+                if self.course == i and abs(GOAL[i][1] - self.x) <= 3 and abs(GOAL[i][0] - self.y) <= 3:
                     self.left_wheel = 0
                     self.right_wheel = 0
-                    print(1)
                     if not self.arrive:
                         self.arrive = True
                         self.count = count
@@ -120,7 +118,7 @@ class Car:
 
 
 def main():
-    car = Car([75, 75])  # x, y
+    car = Car([GOAL[2][1], GOAL[2][0]])  # x, y
     count = 0
     while True:
         for event in pygame.event.get():

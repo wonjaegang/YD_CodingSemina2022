@@ -9,7 +9,7 @@
         제자리회전 금지 >_<
 
 """
-
+import math
 import pygame
 from math import*
 from pygame.locals import *
@@ -32,7 +32,7 @@ GOAL = [[300, 300], [425, 425], [75, 75]]
 
 # 좌표계의 좌측 하단이 0, 0 이다. 우측 방향이 x+, 위쪽 방향이 y+
 class Car:
-    def __init__(self, initial_location, count):
+    def __init__(self, initial_location):
         self.x, self.y = initial_location
 
         self.length = 15
@@ -44,8 +44,9 @@ class Car:
         self.right_wheel = 0
         self.left_wheel = 0
 
-        if self.right_wheel == 0 and self.left_wheel == 0:
-            self.first_count = count
+        self.trigger = 2
+        self.goal = 0
+        self.decision = False
 
     def get_velocity(self):
         r = self.wheel_radius
@@ -75,31 +76,77 @@ class Car:
         pygame.draw.polygon(screen, RED, [corner1, corner2, corner3, corner4])
 
     def set_motor_value(self, count):
-        x_coordinate = round(self.x)
-        y_coordinate = round(self.y)
 
-        x_1 = 300
-        y_1 = 300
+        # 기울기
+        lean = math.tan(self.heading)
 
-        print(x_coordinate, y_coordinate)
-        print(count)
-        print(self.first_count)
+        print(self.goal)
 
-        self.right_wheel = 2.3
-        self.left_wheel = 2.2
-
-        if x_1-10 < x_coordinate < x_1+10 and y_1-10 < y_coordinate < y_1+10:
+        if self.goal == 3:
             self.right_wheel = 0
             self.left_wheel = 0
-            self.first_count = count
-            if self.first_count + 50 < count:
-                self.right_wheel = 2.5
-                self.left_wheel = 2.7
+
+            quit()
+
+        else:
+            if not self.decision:
+                if self.heading > -pi/2:
+                    if GOAL[self.goal][1] > round(lean * (GOAL[self.goal][0] - self.x) + self.y):
+                        self.right_wheel = 2.1
+                        self.left_wheel = 2
+                        print("111111111111111")
+
+                    elif GOAL[self.goal][1] == round(lean * (GOAL[self.goal][0] - self.x) + self.y):
+                        self.right_wheel = 3
+                        self.left_wheel = 3
+                        print("3333333333333333")
+
+                    elif GOAL[self.goal][1] < round(lean * (GOAL[self.goal][0] - self.x) + self.y):
+                        self.right_wheel = 2
+                        self.left_wheel = 2.1
+                        print("2222222222222")
+
+                    if abs(GOAL[self.goal][1] - round(self.y)) < 5 and abs(GOAL[self.goal][1] - round(self.x)) < 5:
+                        self.decision = True
+                        return
+                else:
+                    if GOAL[self.goal][1] > round(lean * (GOAL[self.goal][0] - self.x) + self.y):
+                        self.right_wheel = 2
+                        self.left_wheel = 2.1
+                        print("111111111111111")
+
+                    elif GOAL[self.goal][1] == round(lean * (GOAL[self.goal][0] - self.x) + self.y):
+                        self.right_wheel = 3
+                        self.left_wheel = 3
+                        print("3333333333333333")
+
+                    elif GOAL[self.goal][1] < round(lean * (GOAL[self.goal][0] - self.x) + self.y):
+                        self.right_wheel = 2.1
+                        self.left_wheel = 2
+                        print("2222222222222")
+
+                    if abs(GOAL[self.goal][1] - round(self.y)) < 5 and abs(GOAL[self.goal][1] - round(self.x)) < 5:
+                        self.decision = True
+                        return
+            else:
+                print("goal")
+                self.right_wheel = 0
+                self.left_wheel = 0
+
+                self.trigger += 1
+                print(self.trigger)
+
+                if self.trigger % 100 == 0:
+                    self.decision = False
+                    self.goal += 1
+                    return
+
+        print(round(self.x), round(self.y), lean)
+
 
 def main():
     car = Car([75, 75])  # x, y
     count = 0
-    car.first_count = count
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
