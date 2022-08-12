@@ -86,27 +86,48 @@ class Car:
             self.right_wheel = 0
             self.left_wheel = 0
 
+            quit()
+
         else:
             if not self.decision:
-                if GOAL[self.goal][1] > round(lean * (GOAL[self.goal][0] - self.x) + self.y):
-                    self.right_wheel = 2.5
-                    self.left_wheel = 2
-                    print("111111111111111")
+                if self.heading > -pi/2:
+                    if GOAL[self.goal][1] > round(lean * (GOAL[self.goal][0] - self.x) + self.y):
+                        self.right_wheel = 2.1
+                        self.left_wheel = 2
+                        print("111111111111111")
 
-                elif GOAL[self.goal][1] == round(lean * (GOAL[self.goal][0] - self.x) + self.y):
-                    self.right_wheel = 3
-                    self.left_wheel = 3
-                    print("3333333333333333")
+                    elif GOAL[self.goal][1] == round(lean * (GOAL[self.goal][0] - self.x) + self.y):
+                        self.right_wheel = 3
+                        self.left_wheel = 3
+                        print("3333333333333333")
 
-                elif GOAL[self.goal][1] < round(lean * (GOAL[self.goal][0] - self.x) + self.y):
-                    self.right_wheel = 2
-                    self.left_wheel = 2.5
-                    print("2222222222222")
+                    elif GOAL[self.goal][1] < round(lean * (GOAL[self.goal][0] - self.x) + self.y):
+                        self.right_wheel = 2
+                        self.left_wheel = 2.1
+                        print("2222222222222")
 
-                if abs(GOAL[self.goal][1] - round(self.y)) < 5:
-                    self.decision = True
-                    return
+                    if abs(GOAL[self.goal][1] - round(self.y)) < 5 and abs(GOAL[self.goal][1] - round(self.x)) < 5:
+                        self.decision = True
+                        return
+                else:
+                    if GOAL[self.goal][1] > round(lean * (GOAL[self.goal][0] - self.x) + self.y):
+                        self.right_wheel = 2
+                        self.left_wheel = 2.1
+                        print("111111111111111")
 
+                    elif GOAL[self.goal][1] == round(lean * (GOAL[self.goal][0] - self.x) + self.y):
+                        self.right_wheel = 3
+                        self.left_wheel = 3
+                        print("3333333333333333")
+
+                    elif GOAL[self.goal][1] < round(lean * (GOAL[self.goal][0] - self.x) + self.y):
+                        self.right_wheel = 2.1
+                        self.left_wheel = 2
+                        print("2222222222222")
+
+                    if abs(GOAL[self.goal][1] - round(self.y)) < 5 and abs(GOAL[self.goal][1] - round(self.x)) < 5:
+                        self.decision = True
+                        return
             else:
                 print("goal")
                 self.right_wheel = 0
