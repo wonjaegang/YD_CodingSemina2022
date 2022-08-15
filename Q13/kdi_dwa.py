@@ -161,6 +161,64 @@ class Car:
         return obstacles
 
     def DWA(self):
+        global left_wheel_avg, right_wheel_avg
+        c_obstacle_left = 0
+        c_obstacle_right = 0
+
+        ###################################
+        # 원하는 속도 3단계 (1 ~ 3)
+        wheel_rapid = 3
+        # 원하는 속도 3단계 (1 ~ 3)
+        ###################################
+
+        wheel_rapid_transition = wheel_rapid * 10000
+
+        # 도착 시 정지
+        if abs(self.goal_x - self.x) < 10 and abs(self.goal_y - self.y) < 10:
+            self.left_wheel = 0
+            self.right_wheel = 0
+
+        else:
+            # 왼쪽 바퀴에 넣을 가중치
+            for i in range(60):
+                c_obstacle_left += 1 / pow(self.LiDAR_data[i], 2)
+
+            # 차 기준 정면 좌측 (반시계 방향 기준 / 0 ~ 60도 [ 1 / (거리의 제곱)]의 평균
+            left_wheel_avg = c_obstacle_left / 60
+
+            # 우측 바퀴에 넣을 가중치
+            for j in range(300, 360):
+                c_obstacle_right += 1 / pow(self.LiDAR_data[j], 2)
+
+            # 차 기준 정면 우측 (시계 방향 기준 / 0 ~ 60도 [ 1 / (거리의 제곱)]의 평균
+            right_wheel_avg = c_obstacle_right / 60
+
+        distance_goal = sqrt(pow(self.goal_x - self.x, 2) + pow(self.goal_y - self.y, 2))
+
+        velocity_left_init = 0
+        velocity_right_init = 0
+        a_max = 0
+
+        velocity_left = 0
+        velocity_right = 0
+
+        s_num = 3
+        s_step = 2*a_max/(s_num-1)
+
+        cost = []
+
+        for i in range(s_num):
+            for j in range(s_num):
+                velocity_left = velocity_left_init + s_step*i
+                velocity_right = velocity_right_init + s_step*j
+                cost.append([velocity_left, velocity_right])
+
+        velocity_left, velocity_right = min(cost, key=lambda x: x[0])[1:]
+
+        self.left_wheel = velocity_left + left_wheel_avg * 10000
+        self.right_wheel = velocity_right + right_wheel_avg * 10000
+
+
 
 def main():
     grid_map = GridMap()
