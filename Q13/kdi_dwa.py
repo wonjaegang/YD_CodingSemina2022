@@ -193,6 +193,13 @@ class Car:
             # 차 기준 정면 우측 (시계 방향 기준 / 0 ~ 60도 [ 1 / (거리의 제곱)]의 평균
             right_wheel_avg = c_obstacle_right / 60
 
+            self.left_wheel = wheel_rapid_transition * left_wheel_avg
+            self.right_wheel = wheel_rapid_transition * right_wheel_avg
+
+            best_vel = [self.right_wheel, self.left_wheel]
+
+            return best_vel
+
         distance_goal = sqrt(pow(self.goal_x - self.x, 2) + pow(self.goal_y - self.y, 2))
 
         velocity_left_init = 0
@@ -217,7 +224,6 @@ class Car:
 
         self.left_wheel = velocity_left + left_wheel_avg * 10000
         self.right_wheel = velocity_right + right_wheel_avg * 10000
-
 
 
 def main():
