@@ -196,15 +196,16 @@ class Car:
             self.left_wheel = wheel_rapid_transition * left_wheel_avg
             self.right_wheel = wheel_rapid_transition * right_wheel_avg
 
-            obstacle_balance = abs(c_obstacle_left - c_obstacle_right)
-            distance_goal = sqrt((self.goal_x - self.x) ** 2 + (self.goal_y - self.y) ** 2)
-
             velocity_left_init = 1
             velocity_right_init = 1
             a_max = 10
 
             s_num = 3
             s_step = 2*a_max/(s_num-1)
+
+            obstacle_balance = abs(c_obstacle_left - c_obstacle_right)
+            distance_goal = sqrt((self.goal_x - (self.x + self.get_velocity(self.heading, velocity_right_init, velocity_left_init)[0])) ** 2 +
+                                 (self.goal_y - (self.y + self.get_velocity(self.heading, velocity_right_init, velocity_left_init)[1])) ** 2)
 
             cost_list = []
             velocity = []
