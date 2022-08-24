@@ -1,0 +1,74 @@
+Index: Q10/kdi_two_wheels.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>\"\"\"\r\n자동차는 이제 실제 차량과 점점 더 흡사해진다.\r\n차량은 각각 왼쪽/오른쪽 바퀴를 가지고 있으며, 각 바퀴의 속력을 설정해주어 구동시킨다.\r\n마찬가지로 좌표계의 좌측 하단이 0, 0 이다. 우측 방향이 x+, 위쪽 방향이 y+.\r\n\r\n자동차를  (300,300)로 이동하고, 그 주변에 도착하면 정차한 후,(맘대로)\r\n        (425, 425)로 이동하고, 그 주변에 도착하면 정차한 후,\r\n        (75, 75)로 복귀하도록 코드를 짜보자.\r\n        제자리회전 금지 >_<\r\n\r\n\"\"\"\r\n\r\nimport pygame\r\nfrom math import*\r\nfrom pygame.locals import *\r\n\r\nWHITE = (255, 255, 255)\r\nBLACK = (0, 0, 0)\r\nRED = (255, 0, 0)\r\nGREEN = (0, 255, 0)\r\nBLUE = (0, 0, 255)\r\n\r\npygame.init()\r\nWIDTH = 500\r\nHEIGHT = 500\r\nscreen = pygame.display.set_mode((WIDTH, HEIGHT))\r\nclock = pygame.time.Clock()\r\nrate = 100\r\n\r\nGOAL = [[300, 300], [425, 425], [75, 75]]\r\n\r\n\r\n# 좌표계의 좌측 하단이 0, 0 이다. 우측 방향이 x+, 위쪽 방향이 y+\r\nclass Car:\r\n    def __init__(self, initial_location):\r\n        self.x, self.y = initial_location\r\n\r\n        self.length = 15\r\n        self.width = 10\r\n        self.tread = 10\r\n        self.wheel_radius = 1\r\n\r\n        self.heading = 0\r\n        self.right_wheel = 0\r\n        self.left_wheel = 0\r\n\r\n        self.trigger = 2\r\n        self.goal = 0\r\n        self.decision = False\r\n\r\n    def get_velocity(self):\r\n        r = self.wheel_radius\r\n        L = self.tread / 2\r\n        d_x = cos(self.heading) * r * 0.5 * (self.right_wheel + self.left_wheel)\r\n        d_y = sin(self.heading) * r * 0.5 * (self.right_wheel + self.left_wheel)\r\n        d_theta = r * 0.5 * (self.right_wheel - self.left_wheel) / L\r\n        return d_x, d_y, d_theta\r\n\r\n    def move(self):\r\n        d_x, d_y, d_theta = self.get_velocity()\r\n        self.x += d_x\r\n        self.y += d_y\r\n        self.heading += d_theta\r\n\r\n    def GUI_display(self):\r\n        pygame.draw.circle(screen, GREEN, [75, 500 - 75], 10)\r\n        pygame.draw.circle(screen, BLUE, [300, 500 - 300], 10)\r\n        pygame.draw.circle(screen, BLUE, [425, 500 - 425], 10)\r\n\r\n        a = atan2(self.width, self.length)\r\n        b = sqrt(self.length ** 2 + self.width ** 2) / 2\r\n        corner1 = [self.x + cos(self.heading - a) * b, 500 - (self.y + sin(self.heading - a) * b)]\r\n        corner2 = [self.x + cos(self.heading + a) * b, 500 - (self.y + sin(self.heading + a) * b)]\r\n        corner3 = [self.x + cos(self.heading + pi - a) * b, 500 - (self.y + sin(self.heading + pi - a) * b)]\r\n        corner4 = [self.x + cos(self.heading + pi + a) * b, 500 - (self.y + sin(self.heading + pi + a) * b)]\r\n        pygame.draw.polygon(screen, RED, [corner1, corner2, corner3, corner4])\r\n\r\n    def set_motor_value(self, count):\r\n        print(self.goal)\r\n\r\n        if self.heading < (-pi / 2):\r\n            self.heading = abs(self.heading) - (pi / 2)\r\n\r\n        if self.goal == 3:\r\n            self.right_wheel = 0\r\n            self.left_wheel = 0\r\n\r\n        else:\r\n            if not self.decision:\r\n                if GOAL[self.goal][0] > round(self.heading * (GOAL[self.goal][1] - self.x) + self.y):\r\n                    self.right_wheel = 1.1\r\n                    self.left_wheel = 1\r\n\r\n                elif GOAL[self.goal][0] == round(self.heading * (GOAL[self.goal][1] - self.x) + self.y):\r\n                    self.right_wheel = 1\r\n                    self.left_wheel = 1\r\n\r\n                elif GOAL[self.goal][0] < round(self.heading * (GOAL[self.goal][1] - self.x) + self.y):\r\n                    self.right_wheel = 1\r\n                    self.left_wheel = 1.1\r\n\r\n                if abs(GOAL[self.goal][1] - round(self.y)) < 5:\r\n                    self.decision = True\r\n                    return\r\n            else:\r\n                print(\"goal\")\r\n                self.right_wheel = 0\r\n                self.left_wheel = 0\r\n\r\n                self.trigger += 1\r\n                print(self.trigger)\r\n\r\n                if self.trigger % 100 == 0:\r\n                    self.decision = False\r\n                    self.goal += 1\r\n                    return\r\n\r\n        print(round(self.x), round(self.y), self.heading)\r\n\r\n\r\ndef main():\r\n    car = Car([75, 75])  # x, y\r\n    count = 0\r\n    while True:\r\n        for event in pygame.event.get():\r\n            if event.type == QUIT:\r\n                pygame.quit()\r\n                return 0\r\n\r\n        car.set_motor_value(count)\r\n        car.move()\r\n\r\n        screen.fill(WHITE)\r\n        car.GUI_display()\r\n\r\n        pygame.display.flip()\r\n        clock.tick(rate)\r\n        count += 1\r\n\r\n\r\nif __name__ == '__main__':\r\n    main()\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Q10/kdi_two_wheels.py b/Q10/kdi_two_wheels.py
+--- a/Q10/kdi_two_wheels.py	
++++ b/Q10/kdi_two_wheels.py	
+@@ -78,30 +78,48 @@
+     def set_motor_value(self, count):
+         print(self.goal)
+ 
+-        if self.heading < (-pi / 2):
+-            self.heading = abs(self.heading) - (pi / 2)
+-
+         if self.goal == 3:
+             self.right_wheel = 0
+             self.left_wheel = 0
+ 
+         else:
+             if not self.decision:
+-                if GOAL[self.goal][0] > round(self.heading * (GOAL[self.goal][1] - self.x) + self.y):
+-                    self.right_wheel = 1.1
+-                    self.left_wheel = 1
++
++                if self.heading < (-pi / 2) or self.heading > (pi / 2):
++                    self.heading += pi
++
++                    if GOAL[self.goal][0] < round(self.heading * (GOAL[self.goal][1] - self.x) + self.y):
++                        self.right_wheel = 1.1
++                        self.left_wheel = 1
++
++                    elif GOAL[self.goal][0] == round(self.heading * (GOAL[self.goal][1] - self.x) + self.y):
++                        self.right_wheel = 1
++                        self.left_wheel = 1
++
++                    elif GOAL[self.goal][0] > round(self.heading * (GOAL[self.goal][1] - self.x) + self.y):
++                        self.right_wheel = 1
++                        self.left_wheel = 1.1
++
++                    if abs(GOAL[self.goal][1] - round(self.y)) < 5:
++                        self.decision = True
++                        return
++
++                else:
++                    if GOAL[self.goal][0] > round(self.heading * (GOAL[self.goal][1] - self.x) + self.y):
++                        self.right_wheel = 1.1
++                        self.left_wheel = 1
+ 
+-                elif GOAL[self.goal][0] == round(self.heading * (GOAL[self.goal][1] - self.x) + self.y):
+-                    self.right_wheel = 1
+-                    self.left_wheel = 1
++                    elif GOAL[self.goal][0] == round(self.heading * (GOAL[self.goal][1] - self.x) + self.y):
++                        self.right_wheel = 1
++                        self.left_wheel = 1
+ 
+-                elif GOAL[self.goal][0] < round(self.heading * (GOAL[self.goal][1] - self.x) + self.y):
+-                    self.right_wheel = 1
+-                    self.left_wheel = 1.1
++                    elif GOAL[self.goal][0] < round(self.heading * (GOAL[self.goal][1] - self.x) + self.y):
++                        self.right_wheel = 1
++                        self.left_wheel = 1.1
+ 
+-                if abs(GOAL[self.goal][1] - round(self.y)) < 5:
+-                    self.decision = True
+-                    return
++                    if abs(GOAL[self.goal][1] - round(self.y)) < 5:
++                        self.decision = True
++                        return
+             else:
+                 print("goal")
+                 self.right_wheel = 0
