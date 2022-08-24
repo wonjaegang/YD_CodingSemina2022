@@ -181,14 +181,14 @@ class Car:
         else:
             # 왼쪽 바퀴에 넣을 가중치
             for i in range(60):
-                c_obstacle_left += 1 / pow(self.LiDAR_data[i], 2)
+                c_obstacle_left += 1 / self.LiDAR_data[i] ** 2
 
             # 차 기준 정면 좌측 (반시계 방향 기준 / 0 ~ 60도 [ 1 / (거리의 제곱)]의 평균
             left_wheel_avg = c_obstacle_left / 60
 
             # 우측 바퀴에 넣을 가중치
             for j in range(300, 360):
-                c_obstacle_right += 1 / pow(self.LiDAR_data[j], 2)
+                c_obstacle_right += 1 / self.LiDAR_data[j] ** 2
 
             # 차 기준 정면 우측 (시계 방향 기준 / 0 ~ 60도 [ 1 / (거리의 제곱)]의 평균
             right_wheel_avg = c_obstacle_right / 60
@@ -196,35 +196,44 @@ class Car:
             self.left_wheel = wheel_rapid_transition * left_wheel_avg
             self.right_wheel = wheel_rapid_transition * right_wheel_avg
 
+            velocity_left_init = 1
+            velocity_right_init = 1
+            a_max = 10
+
+            s_num = 3
+            s_step = 2*a_max/(s_num-1)
+
+            obstacle_balance = abs(c_obstacle_left - c_obstacle_right)
+            distance_goal = sqrt((self.goal_x - (self.x + self.get_velocity(self.heading, velocity_right_init, velocity_left_init)[0])) ** 2 +
+                                 (self.goal_y - (self.y + self.get_velocity(self.heading, velocity_right_init, velocity_left_init)[1])) ** 2)
+
+            cost_list = []
+            velocity = []
+
+            obstacle_weight = 0.5
+            goal_weight = 0.5
+            cost = obstacle_weight * obstacle_balance + goal_weight * distance_goal
+
+            for i in range(s_num):
+                for j in range(s_num):
+                    velocity_left = velocity_left_init + s_step*i
+                    velocity_right = velocity_right_init + s_step*j
+                    velocity.append([velocity_left, velocity_right])
+                    cost_list.append(cost)
+            print(cost_list)
+            answer = min(cost_list)
+
+            velocity_left, velocity_right = velocity[cost_list.index(answer)]
+
+            print(velocity_left, velocity_right)
+
+
+            self.left_wheel = velocity_left
+            self.right_wheel = velocity_right
+
             best_vel = [self.right_wheel, self.left_wheel]
 
             return best_vel
-
-        distance_goal = sqrt(pow(self.goal_x - self.x, 2) + pow(self.goal_y - self.y, 2))
-
-        velocity_left_init = 0
-        velocity_right_init = 0
-        a_max = 0
-
-        velocity_left = 0
-        velocity_right = 0
-
-        s_num = 3
-        s_step = 2*a_max/(s_num-1)
-
-        cost = []
-
-        for i in range(s_num):
-            for j in range(s_num):
-                velocity_left = velocity_left_init + s_step*i
-                velocity_right = velocity_right_init + s_step*j
-                cost.append([velocity_left, velocity_right])
-
-        velocity_left, velocity_right = min(cost, key=lambda x: x[0])[1:]
-
-        self.left_wheel = velocity_left + left_wheel_avg * 10000
-        self.right_wheel = velocity_right + right_wheel_avg * 10000
-
 
 def main():
     grid_map = GridMap()
