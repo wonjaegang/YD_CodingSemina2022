@@ -92,6 +92,7 @@ class Car:
         self.x += d_x
         self.y += d_y
         self.heading += d_theta
+        return self.x, self.y, self.heading
 
     def GUI_display(self):
         a = atan2(self.width, self.length)
@@ -161,17 +162,10 @@ class Car:
         return obstacles
 
     def DWA(self):
+
         global left_wheel_avg, right_wheel_avg
         c_obstacle_left = 0
         c_obstacle_right = 0
-
-        ###################################
-        # 원하는 속도 3단계 (1 ~ 3)
-        wheel_rapid = 3
-        # 원하는 속도 3단계 (1 ~ 3)
-        ###################################
-
-        wheel_rapid_transition = wheel_rapid * 10000
 
         # 도착 시 정지
         if abs(self.goal_x - self.x) < 10 and abs(self.goal_y - self.y) < 10:
@@ -193,9 +187,6 @@ class Car:
             # 차 기준 정면 우측 (시계 방향 기준 / 0 ~ 60도 [ 1 / (거리의 제곱)]의 평균
             right_wheel_avg = c_obstacle_right / 60
 
-            self.left_wheel = wheel_rapid_transition * left_wheel_avg
-            self.right_wheel = wheel_rapid_transition * right_wheel_avg
-
             velocity_left_init = 1
             velocity_right_init = 1
             a_max = 10
@@ -204,6 +195,7 @@ class Car:
             s_step = 2*a_max/(s_num-1)
 
             obstacle_balance = abs(c_obstacle_left - c_obstacle_right)
+
             distance_goal = sqrt((self.goal_x - (self.x + self.get_velocity(self.heading, velocity_right_init, velocity_left_init)[0])) ** 2 +
                                  (self.goal_y - (self.y + self.get_velocity(self.heading, velocity_right_init, velocity_left_init)[1])) ** 2)
 
@@ -216,17 +208,27 @@ class Car:
 
             for i in range(s_num):
                 for j in range(s_num):
-                    velocity_left = velocity_left_init + s_step*i
-                    velocity_right = velocity_right_init + s_step*j
-                    velocity.append([velocity_left, velocity_right])
-                    cost_list.append(cost)
-            print(cost_list)
+                    velocity_right = velocity_right_init + s_step*i
+                    velocity_left = velocity_left_init + s_step*j
+                    velocity.append([velocity_right, velocity_left])
+                    print(velocity)
+            # velocity 다 들어갓음
+
+            d_move_list = []
+            pos_future = []
+
+            for k in range(s_num**2):
+                d_move_list = self.get_velocity(self.heading, velocity[k][0], velocity[k][1])
+                self.move()
+                    distance_goal = sqrt((self.goal_x - pos_future[0])**2 + (self.goal_y - pos_future[1])**2)
+
+
+           print(cost_list)
             answer = min(cost_list)
 
             velocity_left, velocity_right = velocity[cost_list.index(answer)]
 
             print(velocity_left, velocity_right)
-
 
             self.left_wheel = velocity_left
             self.right_wheel = velocity_right
