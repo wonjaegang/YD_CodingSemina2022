@@ -174,8 +174,8 @@ class Car:
 
         else:
 
-            velocity_left_init = 1
-            velocity_right_init = 1
+            velocity_left_init = self.left_wheel
+            velocity_right_init = self.right_wheel
 
             a_max = 0.0000001
 
