@@ -173,7 +173,7 @@ class Car:
         if abs(self.goal_x - self.x) < 10 and abs(self.goal_y - self.y) < 10:
             self.left_wheel = 0
             self.right_wheel = 0
-
+        # 초기 속도 지정 / 그 이후는  속도로 초기 속도 초기화
         else:
             if self.trigger == 0:
                 velocity_left_init = 0.00000001
@@ -190,20 +190,6 @@ class Car:
 
             s_num = 5
             s_step = 2*a_max/(s_num-1)
-
-            # 왼쪽 바퀴에 넣을 가중치
-            for i in range(60):
-                c_obstacle_left += 1 / (self.LiDAR_data[i] ** 2 + 1)
-
-            # 차 기준 정면 좌측 (반시계 방향 기준 / 0 ~ 60도 [ 1 / (거리의 제곱)]의 평균
-            left_wheel_avg = c_obstacle_left / 60
-
-            # 우측 바퀴에 넣을 가중치
-            for j in range(300, 360):
-                c_obstacle_right += 1 / (self.LiDAR_data[j] ** 2 + 1)
-
-            # 차 기준 정면 우측 (시계 방향 기준 / 0 ~ 60도 [ 1 / (거리의 제곱)]의 평균
-            right_wheel_avg = c_obstacle_right / 60
 
             velocity = []
             print('1')
@@ -232,6 +218,21 @@ class Car:
             print(index_future)
             # 이에 해당하는 속도 찾기
             velocity_future_right, velocity_future_left = velocity[index_future]
+            #####################################################################################
+            # 왼쪽 바퀴에 넣을 가중치
+            for i in range(60):
+                c_obstacle_left += 1 / (self.LiDAR_data[i] ** 2 + 1)
+
+            # 차 기준 정면 좌측 (반시계 방향 기준 / 0 ~ 60도 [ 1 / (거리의 제곱)]의 평균
+            left_wheel_avg = c_obstacle_left / 60
+
+            # 우측 바퀴에 넣을 가중치
+            for j in range(300, 360):
+                c_obstacle_right += 1 / (self.LiDAR_data[j] ** 2 + 1)
+
+            # 차 기준 정면 우측 (시계 방향 기준 / 0 ~ 60도 [ 1 / (거리의 제곱)]의 평균
+            right_wheel_avg = c_obstacle_right / 60
+            ######################################################################################
 
             # 장애물 가중치, 거리 가중치
             obstacle_weight = 0.05
