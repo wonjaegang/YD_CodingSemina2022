@@ -173,66 +173,139 @@ class Car:
             self.right_wheel = 0
 
         else:
+            trigger = 1
+            if trigger == 1:
+                velocity_left_init = 1
+                velocity_right_init = 1
 
-            velocity_left_init = self.left_wheel
-            velocity_right_init = self.right_wheel
+                trigger += 1
+                print(trigger)
+                print(velocity_left_init)
 
-            a_max = 0.0000001
+                a_max = 2
 
-            s_num = 3
-            s_step = 2*a_max/(s_num-1)
+                s_num = 3
+                s_step = 2 * a_max / (s_num - 1)
 
-            # 왼쪽 바퀴에 넣을 가중치
-            for i in range(60):
-                c_obstacle_left += 1 / (self.LiDAR_data[i] ** 2 + 1)
+                # 왼쪽 바퀴에 넣을 가중치
+                for i in range(60):
+                    c_obstacle_left += 1 / (self.LiDAR_data[i] ** 2 + 1)
 
-            # 차 기준 정면 좌측 (반시계 방향 기준 / 0 ~ 60도 [ 1 / (거리의 제곱)]의 평균
-            left_wheel_avg = c_obstacle_left / 60
+                # 차 기준 정면 좌측 (반시계 방향 기준 / 0 ~ 60도 [ 1 / (거리의 제곱)]의 평균
+                left_wheel_avg = c_obstacle_left / 60
 
-            # 우측 바퀴에 넣을 가중치
-            for j in range(300, 360):
-                c_obstacle_right += 1 / (self.LiDAR_data[j] ** 2 + 1)
+                # 우측 바퀴에 넣을 가중치
+                for j in range(300, 360):
+                    c_obstacle_right += 1 / (self.LiDAR_data[j] ** 2 + 1)
 
-            # 차 기준 정면 우측 (시계 방향 기준 / 0 ~ 60도 [ 1 / (거리의 제곱)]의 평균
-            right_wheel_avg = c_obstacle_right / 60
+                # 차 기준 정면 우측 (시계 방향 기준 / 0 ~ 60도 [ 1 / (거리의 제곱)]의 평균
+                right_wheel_avg = c_obstacle_right / 60
 
-            velocity = []
+                velocity = []
 
-            for i in range(s_num):
-                for j in range(s_num):
-                    velocity_right = velocity_right_init + s_step*i
-                    velocity_left = velocity_left_init + s_step*j
-                    velocity.append([velocity_right, velocity_left])
-                    print(velocity)
+                for i in range(s_num):
+                    for j in range(s_num):
+                        velocity_right = velocity_right_init + s_step * i
+                        velocity_left = velocity_left_init + s_step * j
+                        velocity.append([velocity_right, velocity_left])
 
-            # velocity 다 들어갔음
-            distance_list = []
+                print(velocity)
 
-            for k in range(s_num**2):
-                d_x, d_y, d_theta = self.get_velocity(self.heading, velocity[k][0], velocity[k][1])
-                self.x += d_x
-                self.y += d_y
-                self.heading += d_theta
+                # velocity 다 들어갔음
+                distance_list = []
 
-                # 가능한 속도로 움직였을 때의 위치를 통한 목표까지 거리
-                distance_list.append(sqrt((self.goal_x - self.x)**2 + (self.goal_y - self.y)**2))
+                for k in range(s_num ** 2):
+                    d_x, d_y, d_theta = self.get_velocity(self.heading, velocity[k][0], velocity[k][1])
+                    self.x += d_x
+                    self.y += d_y
+                    self.heading += d_theta
 
-            # distance_list 최소값에 해당하는 인덱스 찾기
-            index_future = distance_list.index(min(distance_list))
+                    # 가능한 속도로 움직였을 때의 위치를 통한 목표까지 거리
+                    distance_list.append(sqrt((self.goal_x - self.x) ** 2 + (self.goal_y - self.y) ** 2))
+                print(distance_list)
 
-            # 이에 해당하는 속도 찾기
-            velocity_future_right, velocity_future_left = velocity[index_future]
+                # distance_list 최소값에 해당하는 인덱스 찾기
+                index_future = distance_list.index(min(distance_list))
+                print(index_future)
+                # 이에 해당하는 속도 찾기
+                velocity_future_right, velocity_future_left = velocity[index_future]
 
-            # 장애물 가중치, 거리 가중치
-            obstacle_weight = 1
-            distance_weight = 1
+                # 장애물 가중치, 거리 가중치
+                obstacle_weight = 1
+                distance_weight = 1
 
-            self.right_wheel = c_obstacle_right * obstacle_weight + velocity_future_right * distance_weight
-            self.left_wheel = c_obstacle_left * obstacle_weight + velocity_future_left * distance_weight
+                self.right_wheel = c_obstacle_right * obstacle_weight + velocity_future_right * distance_weight
+                self.left_wheel = c_obstacle_left * obstacle_weight + velocity_future_left * distance_weight
 
-            best_vel = [self.right_wheel, self.left_wheel]
+                best_vel = [self.right_wheel, self.left_wheel]
+                print(best_vel)
 
-            return best_vel
+                return best_vel
+            else:
+                velocity_right_init, velocity_left_init = best_vel
+
+                print(trigger)
+                print(velocity_left_init)
+
+                a_max = 2
+
+                s_num = 3
+                s_step = 2*a_max/(s_num-1)
+
+                # 왼쪽 바퀴에 넣을 가중치
+                for i in range(60):
+                    c_obstacle_left += 1 / (self.LiDAR_data[i] ** 2 + 1)
+
+                # 차 기준 정면 좌측 (반시계 방향 기준 / 0 ~ 60도 [ 1 / (거리의 제곱)]의 평균
+                left_wheel_avg = c_obstacle_left / 60
+
+                # 우측 바퀴에 넣을 가중치
+                for j in range(300, 360):
+                    c_obstacle_right += 1 / (self.LiDAR_data[j] ** 2 + 1)
+
+                # 차 기준 정면 우측 (시계 방향 기준 / 0 ~ 60도 [ 1 / (거리의 제곱)]의 평균
+                right_wheel_avg = c_obstacle_right / 60
+
+                velocity = []
+
+                for i in range(s_num):
+                    for j in range(s_num):
+                        velocity_right = velocity_right_init + s_step*i
+                        velocity_left = velocity_left_init + s_step*j
+                        velocity.append([velocity_right, velocity_left])
+
+                print(velocity)
+
+                # velocity 다 들어갔음
+                distance_list = []
+
+                for k in range(s_num**2):
+                    d_x, d_y, d_theta = self.get_velocity(self.heading, velocity[k][0], velocity[k][1])
+                    self.x += d_x
+                    self.y += d_y
+                    self.heading += d_theta
+
+                    # 가능한 속도로 움직였을 때의 위치를 통한 목표까지 거리
+                    distance_list.append(sqrt((self.goal_x - self.x)**2 + (self.goal_y - self.y)**2))
+                print(distance_list)
+
+                # distance_list 최소값에 해당하는 인덱스 찾기
+                index_future = distance_list.index(min(distance_list))
+                print(index_future)
+                # 이에 해당하는 속도 찾기
+                velocity_future_right, velocity_future_left = velocity[index_future]
+
+                # 장애물 가중치, 거리 가중치
+                obstacle_weight = 1
+                distance_weight = 1
+
+                self.right_wheel = c_obstacle_right * obstacle_weight + velocity_future_right * distance_weight
+                self.left_wheel = c_obstacle_left * obstacle_weight + velocity_future_left * distance_weight
+
+                best_vel = [self.right_wheel, self.left_wheel]
+                print(best_vel)
+
+                return best_vel
 
 def main():
     grid_map = GridMap()
