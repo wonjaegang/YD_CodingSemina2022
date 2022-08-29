@@ -76,6 +76,8 @@ class Car:
         self.heading = 0
         self.right_wheel = 0
         self.left_wheel = 0
+        self.last_velocity = 0
+        self.trigger = 0
 
         self.LiDAR_data = []
 
@@ -173,13 +175,20 @@ class Car:
             self.right_wheel = 0
 
         else:
+            if self.trigger == 0:
+                velocity_left_init = 0.00000001
+                velocity_right_init = 0.00000001
 
-            velocity_left_init = self.left_wheel
-            velocity_right_init = self.right_wheel
+                self.trigger += 1
+                print("wwwwww")
+            else:
+                velocity_right_init, velocity_left_init = self.last_velocity
 
-            a_max = 0.0000001
+            print(velocity_right_init, velocity_left_init)
 
-            s_num = 3
+            a_max = 0.000000001
+
+            s_num = 5
             s_step = 2*a_max/(s_num-1)
 
             # 왼쪽 바퀴에 넣을 가중치
@@ -197,13 +206,14 @@ class Car:
             right_wheel_avg = c_obstacle_right / 60
 
             velocity = []
-
+            print('1')
             for i in range(s_num):
                 for j in range(s_num):
                     velocity_right = velocity_right_init + s_step*i
                     velocity_left = velocity_left_init + s_step*j
                     velocity.append([velocity_right, velocity_left])
-                    print(velocity)
+
+            print(velocity)
 
             # velocity 다 들어갔음
             distance_list = []
@@ -219,18 +229,20 @@ class Car:
 
             # distance_list 최소값에 해당하는 인덱스 찾기
             index_future = distance_list.index(min(distance_list))
-
+            print(index_future)
             # 이에 해당하는 속도 찾기
             velocity_future_right, velocity_future_left = velocity[index_future]
 
             # 장애물 가중치, 거리 가중치
-            obstacle_weight = 1
+            obstacle_weight = 0.05
             distance_weight = 1
 
             self.right_wheel = c_obstacle_right * obstacle_weight + velocity_future_right * distance_weight
             self.left_wheel = c_obstacle_left * obstacle_weight + velocity_future_left * distance_weight
 
             best_vel = [self.right_wheel, self.left_wheel]
+            print(best_vel)
+            self.last_velocity = best_vel
 
             return best_vel
 
