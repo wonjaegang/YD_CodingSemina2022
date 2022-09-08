@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/YD_CodingSemina2022.iml" filepath="$PROJECT_DIR$/.idea/YD_CodingSemina2022.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../convert_text_to_Braille/.idea/convert_text_to_Braille.iml" filepath="$PROJECT_DIR$/../convert_text_to_Braille/.idea/convert_text_to_Braille.iml" />
       <module fileurl="file://$PROJECT_DIR$/../convert_text_to_Braille-main/.idea/convert_text_to_Braille-main.iml" filepath="$PROJECT_DIR$/../convert_text_to_Braille-main/.idea/convert_text_to_Braille-main.iml" />
     </modules>
   </component>
