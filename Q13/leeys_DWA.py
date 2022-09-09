@@ -1,8 +1,6 @@
 import pygame
 from math import *
 from pygame.locals import *
-import sys
-sys.setrecursionlimit(10**7)
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -54,7 +52,6 @@ class GridMap:
         return self.obstacles
 
 
-# 좌표계의 좌측 하단이 0, 0 이다. 우측 방향이 x+, 위쪽 방향이 y+
 class Car:
     def __init__(self, initial_location, goal_location):
         self.x, self.y = initial_location
@@ -143,8 +140,8 @@ class Car:
         #                           Y_MAX - (self.y + data * sin(self.heading + radians(direction)))])
         self.LiDAR_data = data_list
 
-    # def set_motor_value(self, obstacles):
-    #     self.right_wheel, self.left_wheel = self.DWA(obstacles)
+    def set_motor_value(self, count):
+        self.right_wheel, self.left_wheel = self.DWA()
 
     def obstacles(self):
         obstacles = []
@@ -154,90 +151,45 @@ class Car:
                                   self.y + sin(self.heading + radians(degree)) * distance])
         return obstacles
 
-    def DWA(self, obstacles):
-        cur_v = [self.right_wheel, self.left_wheel]
-        dynamic_window = [[[0 for _ in range(2)] for _ in range(7)] for _ in range(7)]
-        for i in range(7):
-            for j in range(7):
-                dynamic_window[i][j] = [cur_v[0] + self.max_a / 3 * (i - 3), cur_v[1] + self.max_a / 3 * (j - 3)]
-
-        def objective_function(heading, right_wheel, left_wheel):
-            virtual_pos_x, virtual_pos_y, virtual_heading = self.x, self.y, self.heading
-            count, max_count = 0, 100
-
-            while True:
-                r = self.wheel_radius
-                L = self.tread / 2
-                d_x = cos(heading) * r * 0.5 * (right_wheel + left_wheel)
-                d_y = sin(heading) * r * 0.5 * (right_wheel + left_wheel)
-                d_theta = r * 0.5 * (right_wheel - left_wheel) / L
-                virtual_pos_x += d_x
-                virtual_pos_y += d_y
-                virtual_heading += d_theta
-
-                def virtual_LiDAR(obstacle):
-                    data_list = [0.0 for _ in range(360)]
-                    for direction in range(0, 360):
-                        angle = (virtual_heading + radians(direction)) % (pi * 2)
-                        x_positive = False if pi / 2 <= angle < pi / 2 * 3 else True
-                        y_positive = True if 0 <= angle < pi else False
-                        distance = []
-                        x_index = virtual_pos_x // GRID_SIZE_X + x_positive
-                        while True:
-                            if x_index == GRID_NUM_X * x_positive:
-                                break
-                            else:
-                                x_value = x_index * GRID_SIZE_X
-                                y_value = tan(angle) * (x_value - virtual_pos_x) + virtual_pos_y
-                                y_index = y_value // GRID_SIZE_Y
-                                if not 0 < y_index < GRID_NUM_Y:
-                                    break
-                                if [x_index + x_positive - 1, y_index] in obstacle:
-                                    distance.append(
-                                        sqrt((x_value - virtual_pos_x) ** 2 + (y_value - virtual_pos_y) ** 2))
-                                    break
-                                x_index += x_positive * 2 - 1
-
-                        y_index = virtual_pos_y // GRID_SIZE_Y + y_positive
-                        while True:
-                            if y_index == GRID_NUM_Y * y_positive:
-                                break
-                            else:
-                                y_value = y_index * GRID_SIZE_Y
-                                x_value = (y_value - virtual_pos_y) / tan(angle) + virtual_pos_x if tan(
-                                    angle) else X_MAX
-                                x_index = x_value // GRID_SIZE_X
-                                if not 0 < x_index < GRID_NUM_X:
-                                    break
-                                if [x_index, y_index + y_positive - 1] in obstacle:
-                                    distance.append(
-                                        sqrt((x_value - virtual_pos_x) ** 2 + (y_value - virtual_pos_y) ** 2))
-                                    break
-                                y_index += y_positive * 2 - 1
-                        data_list[direction] = min(distance) if distance else 0
-                    return data_list
-                count += 1
-                if not min(virtual_LiDAR(obstacles)) or \
-                        170 <= abs(heading - virtual_heading) <= 190 * pi or count >= max_count:
-                    break
-
-            objective_function(self.heading, *dynamic_window[i][j])
-            w1 = 1 - count / max_count
-            w2 = abs(atan2(self.goal_x - virtual_pos_x, self.goal_y - virtual_pos_y) - virtual_heading) / pi
-            return 0.5 * w1 + 0.5 * w2
-
+    def DWA(self):
+        w1, w2, w3 = 1, 1, 0
         cost_list = []
-        for i in range(7):
-            for j in range(7):
-                cost_list.append([objective_function(self.heading, *dynamic_window[i][j]), i, j])
-        self.right_wheel, self.left_wheel = dynamic_window[min(cost_list, key=lambda x: x[0])[1]][min(cost_list, key=lambda x: x[0])[2]]
-        # return dynamic_window[min(cost_list, key=lambda x: x[0])[1]][min(cost_list, key=lambda x: x[0])[2]]
+        search_frame = 10
+        obstacle_force = 100
+        window_size = 5
+        obstacles = self.obstacles()
 
-            # 왼쪽, 오른쪽 속도로 Dynamic window 설정
-            # 각각의 속도(v_l, v_r)를 모두 넣은 리스트를 만들어 함수에 넣기
-            # 루프를 돌려 미래 상황 예측 -> 다음 상황이 문제가 없다면 count += 1
-            # (1)count가 가장 높을수록, (2)그 미래 상황이 목표와 각도 차이가 작을수록 낮은 비용 부여
-            # 낮은 비용의 속도(v_l, v_r) 선택
+        right_wheel_step = [self.right_wheel - self.max_a + (2 * self.max_a / (window_size - 1)) * i
+                            for i in range(window_size) if
+                            abs(self.right_wheel - self.max_a + (2 * self.max_a / (window_size - 1)) * i)
+                            <= self.max_v]
+        left_wheel_step = [self.right_wheel - self.max_a + (2 * self.max_a / (window_size - 1) * i)
+                           for i in range(window_size) if
+                           abs(self.right_wheel - self.max_a + (2 * self.max_a / (window_size - 1)) * i)
+                           <= self.max_v]
+
+        def objective_function(state):
+            cost1 = sqrt((self.goal_x - state[0]) ** 2 + (self.goal_y - state[1]) ** 2)
+            closest_obstacle = min([sqrt((obs[0] - state[0]) ** 2 + (obs[1] - state[1]) ** 2)
+                                    for obs in obstacles])
+            cost2 = obstacle_force - closest_obstacle if obstacle_force > closest_obstacle else 0
+            # cost3 = abs(3 - (state[3] + state[4]) / 2)
+            return w1 * cost1 + w2 * cost2 # + w3 * cost3
+
+        best_cost = float('inf')
+        for right_wheel in right_wheel_step:
+            for left_wheel in left_wheel_step:
+                pos_x, pos_y, pos_heading = self.x, self.y, self.heading
+                d_x, d_y, d_theta = self.get_velocity(self.heading, right_wheel, left_wheel)
+                for _ in range(search_frame):                       # 이
+                    pos_x += d_x                                    # 게
+                    pos_y += d_y                                    # 외
+                    pos_heading += d_theta                          # 않
+                car_state = [pos_x, pos_y]                          # 되
+                cost = objective_function(car_state)                # ?
+                cost_list.append([cost, round(right_wheel, 2), round(left_wheel, 2)])
+        best_val = min(cost_list, key=lambda x: x[0])[1:]
+        return best_val
 
 
 def main():
@@ -255,7 +207,7 @@ def main():
         car.GUI_display()
 
         car.LiDAR(grid_map.obstacles)
-        car.DWA(grid_map.obstacles)
+        car.set_motor_value(count)
         car.move()
 
         pygame.display.flip()
