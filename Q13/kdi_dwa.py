@@ -103,7 +103,8 @@ class Car:
         corner2 = [self.x + cos(self.heading + a) * b, Y_MAX - (self.y + sin(self.heading + a) * b)]
         corner3 = [self.x + cos(self.heading + pi - a) * b, Y_MAX - (self.y + sin(self.heading + pi - a) * b)]
         corner4 = [self.x + cos(self.heading + pi + a) * b, Y_MAX - (self.y + sin(self.heading + pi + a) * b)]
-        pygame.draw.polygon(screen, RED, [corner1, corner2, corner3, corner4])
+        pygame.draw.polygon(screen, RED, [corner1, corner2, corner3, corner4]
+                            )
 
     def LiDAR(self, obstacles, resolution=1):
         data_list = [0.0 for _ in range(360)]
