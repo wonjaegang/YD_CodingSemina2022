@@ -152,6 +152,7 @@ class Car:
         self.right_wheel, self.left_wheel = self.DWA()
 
     def obstacles(self):
+        # 즉 0은 받지 않겠다 / 측정되지 않은 것들은 obstacles에 받지 않겠다 이유: 장애물들의 절대좌표를 받는 것이라 필요가 없다
         obstacles = []
         for degree, distance in enumerate(self.LiDAR_data):
             if distance:
@@ -160,19 +161,46 @@ class Car:
         return obstacles
 
     def DWA(self):
+        weight1 = 1
+        weight2 = 1
+        # 장애물 비용함수 맞춰주기 용 상수
+        obstacle_force = 100
+
+        # 비용함수 정하기
+        def cost_function(pos):
+            cost1 = sqrt((pos[0] - self.x) ** 2 + (pos[1] - self.y) ** 2)
+            obstacle_min_distance = min([sqrt((pos[0] - obstacle[0]) ** 2 + (pos[1] - obstacle[1]) ** 2) for
+                                         obstacle in self.obstacles()])
+            cost2 = obstacle_force - obstacle_min_distance
+            return cost1 * weight1 + cost2 * weight2
+
         # 미래 속도 값 정하기
         DWA_size = 5
         DWA_step = 2 * self.max_a / (DWA_size - 1)
         DWA_right_v = [self.right_wheel - self.max_a + DWA_step * i for i in range(DWA_size) if
-                       (self.right_wheel - self.max_a + DWA_step * i) <= self.max_v]
+                       abs(self.right_wheel - self.max_a + DWA_step * i) <= self.max_v]
         DWA_left_v = [self.left_wheel - self.max_a + DWA_step * i for i in range(DWA_size) if
-                      (self.left_wheel - self.max_a + DWA_step * i) <= self.max_v]
-        # 미래 속도 값 정하기 끝
+                      abs(self.left_wheel - self.max_a + DWA_step * i) <= self.max_v]
 
-        weight1 = 1
-        weight2 = 1
+        # 타임스톤 몇 번 허쉴?
+        set_timestone = 10
 
         # 미래의 위치 값을 받아야함 만들어진 속도들을 바탕으로 각각을 get.velocity 함수에 넣어 파악할 수 있다. -> x, y 좌표와 헤딩을,,
+        # 각 바퀴들의 속도 조합마다의 미래 x, y, heading 필요
+        best_cost = float('inf')
+        best_vel = [self.right_wheel, self.left_wheel]
+        for right_v in DWA_right_v:
+            for left_v in DWA_left_v:
+                pos_future = [self.x, self.y, self.heading]
+                for _ in range(set_timestone):
+                    rate_of_change = self.get_velocity(pos_future[-1], right_v, left_v)
+                    pos_future = [pos + rate_of_change for pos, rate_of_change in zip(pos_future, rate_of_change)]
+                cost = cost_function(pos_future[:2])
+                if cost < best_cost:
+                    best_cost = cost
+                    best_vel = [right_v, left_v]
+        return best_vel
+
 
 
 
