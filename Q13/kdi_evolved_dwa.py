@@ -168,7 +168,7 @@ class Car:
 
         # 비용함수 정하기
         def cost_function(pos):
-            cost1 = sqrt((pos[0] - self.x) ** 2 + (pos[1] - self.y) ** 2)
+            cost1 = sqrt((pos[0] - self.goal_x) ** 2 + (pos[1] - self.goal_y) ** 2)
             obstacle_min_distance = min([sqrt((pos[0] - obstacle[0]) ** 2 + (pos[1] - obstacle[1]) ** 2) for
                                          obstacle in self.obstacles()])
             cost2 = obstacle_force - obstacle_min_distance
