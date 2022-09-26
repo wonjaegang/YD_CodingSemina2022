@@ -181,7 +181,7 @@ class Car:
                 velocity_right_init = 0.00000001
 
                 self.trigger += 1
-                print("wwwwww")
+                print("dwa")
             else:
                 velocity_right_init, velocity_left_init = self.last_velocity
 

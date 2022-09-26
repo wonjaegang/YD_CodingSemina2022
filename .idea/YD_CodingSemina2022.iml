@@ -8,5 +8,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="convert_text_to_Braille" />
     <orderEntry type="module" module-name="Practice_pr" />
+    <orderEntry type="module" module-name="convert_text_to_Braille" />
   </component>
 </module>
