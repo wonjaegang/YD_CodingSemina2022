@@ -27,7 +27,7 @@
 # 입력 - 6
 # 출력 - "game over"
 
-# boolean_list = [False, False, False, False, False]
+# 2일, 약 5시간 걸림.
 
 player_list = [0, 0, 0, 0, 0]
 minute = 0
