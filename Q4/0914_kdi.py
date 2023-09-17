@@ -27,55 +27,61 @@
 # 입력 - 6
 # 출력 - "game over"
 
+# boolean_list = [False, False, False, False, False]
+
 player_list = [0, 0, 0, 0, 0]
 minute = 0
 
-def detect_blackout_machine(blackout_team_num):
+def detect_blackout_machine(team_num_list):
+    # global boolean_list
     global minute
     global player_list
     minute += 1
-
-    if blackout_team_num == 0:
-        for i in range(len(player_list)):
-            if player_list[i] > 0:
-                player_list[i] += 1
-                if player_list[i] == 6:
-                    player_list[i] = 0
-
-    elif blackout_team_num < 6:
-        player_list[blackout_team_num - 1] += 1
-
-        for i in range(len(player_list)):
-            if player_list[i] > 0:
-                player_list[i] += 1
-                if player_list[i] == 6:
-                    player_list[i] = 0
+    count = 0
+    for index in team_num_list:
+        # 입력 - 0
+        if index == 0:
+            for i in range(len(player_list)):
+                if player_list[i] > 0:
+                    player_list[i] += 1
+                    if player_list[i] == 6:
+                        player_list[i] = 0
+        # 입력 - 6
+        elif index == 6:
+            return 'game over'
+        # 입력 - 1~5
+        else:
+            player_list[index - 1] += 1
+            if count == 0:
+                for i in range(len(player_list)):
+                    if i != (index - 1):
+                        if player_list[i] > 0:
+                            player_list[i] += 1
+                            if player_list[i] == 6:
+                                player_list[i] = 0
+                count += 1
 
     copy_player_list = player_list.copy()
 
     for k in range(len(player_list)):
         if copy_player_list[k] != 0:
-            copy_player_list[k] = 'On'
-        else:
             copy_player_list[k] = 'Off'
-    print(player_list)
+        else:
+            copy_player_list[k] = 'On'
     print(f'출력 - {minute}분: 1:{copy_player_list[0]}, 2:{copy_player_list[1]}, 3:{copy_player_list[2]}, 4:{copy_player_list[3]}, 5:{copy_player_list[4]}')
 
 
 def main():
-    # index_list = []
-    # team_num = int(input('입력 - '))
-    # while True:
-    #     index_list.append(team_num % 10)
-    #     blackout_team_num = team_num // 10
-    # for index in index_list:
-    #     detect_blackout_machine(index - 1)
-    # while True:
-    #     detect_blackout_machine(blackout_team_num)
-
     while True:
-        team_num = int(input('입력 - '))
-        detect_blackout_machine(team_num)
+        num_arr = []
+        team_num = str(input('입력 - '))
+
+        for i in range(len(team_num)):
+            num_arr.append(int(team_num[i]))
+        if detect_blackout_machine(num_arr) == 'game over':
+            print('"game over"')
+            break
+
 
 
 
