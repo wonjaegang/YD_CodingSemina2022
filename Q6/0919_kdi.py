@@ -36,6 +36,7 @@
 # OXXO
 # """""
 #
+import copy
 
 import numpy as np
 
@@ -47,11 +48,12 @@ def print_grid(grid):
         for w_idx in range(w_W):
             print(grid[h_idx][w_idx], end='')
         print('')
+
 def game_a(h, w):
     grid = []
     w_grid = ['O'] * w
     for h_idx in range(h):
-        grid.append(w_grid)
+        grid.append(copy.deepcopy(w_grid))
     # grid = [w_grid for _ in range(h)]
 
     print_grid(grid)
@@ -60,19 +62,74 @@ def game_a(h, w):
 
 def game_b(grid, h, w):
     global h_H, w_W
-    if grid[h - 1][w - 1] == 'O':
-        grid[h - 1][w - 1] = 'X'
-    elif grid[h - 1][w - 1] == 'X':
+
+    if grid[h - 1][w - 1] == 'X':
         grid[h - 1][w - 1] = 'O'
+    else:
+        grid[h - 1][w - 1] = 'X'
 
     print_grid(grid)
 
+    # detect finish
+    count = 0
     for h_idx in range(h_H):
         for w_idx in range(w_W):
-            if grid[h_idx][w_idx] == 'O':
-                continue
-            else:
-                return 'break'
+            if grid[h_idx][w_idx] == 'X':
+                count += 1
+                if count == h_H * w_W:
+                    return 'done'
+
+def game_c(grid, h, w):
+    global h_H, w_W
+
+    # grid[h - 1][w - 1] 기준 / 하 grid[h][w - 1] / grid[h - 2][w - 1] 상 / grid[h - 1][w - 2] 좌 / grid[h - 1][w] 우
+
+    # 기준
+    if grid[h - 1][w - 1] == 'O':
+        grid[h - 1][w - 1] = 'X'
+    else:
+        grid[h - 1][w - 1] = 'O'
+
+    # 상
+    if h > 1:
+        if grid[h - 2][w - 1] == 'O':
+            grid[h - 2][w - 1] = 'X'
+        else:
+            grid[h - 2][w - 1] = 'O'
+    # 하
+    try:
+        if grid[h][w - 1] == 'O':
+            grid[h][w - 1] = 'X'
+        else:
+            grid[h][w - 1] = 'O'
+    except:
+        pass
+    # 좌
+    if w > 1:
+        if grid[h - 1][w - 2] == 'O':
+            grid[h - 1][w - 2] = 'X'
+        else:
+            grid[h - 1][w - 2] = 'O'
+
+    # 우
+    try:
+        if grid[h - 1][w] == 'O':
+            grid[h - 1][w] = 'X'
+        else:
+            grid[h - 1][w] = 'O'
+    except:
+        pass
+
+    print_grid(grid)
+
+    # detect finish
+    count = 0
+    for h_idx in range(h_H):
+        for w_idx in range(w_W):
+            if grid[h_idx][w_idx] == 'X':
+                count += 1
+                if count == h_H * w_W:
+                    return 'done'
 
 def main():
     global h_H, w_W
@@ -88,6 +145,12 @@ def main():
             if b == 'done':
                 break
 
+    elif game_ver == 'c':
+        while True:
+            h_g, w_g = map(int, input('H, W를 입력하시오: ').split(','))
+            c = game_c(grid, h_g, w_g)
+            if c == 'done':
+                break
 
 
 if __name__ == '__main__':
