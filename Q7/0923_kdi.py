@@ -12,12 +12,13 @@ print_grid_map()은 가상의 라이다 virtual_lidar() 로부터 1도의 간격
 """
 
 import pygame
-from math import*
+from math import *
 from pygame.locals import *
+import sys
+import numpy as np
 
 pygame.init()
 screen = pygame.display.set_mode((500, 500))
-screen1 = pygame.display.set_mode((500, 500))
 clock = pygame.time.Clock()
 rate = 90
 
@@ -31,24 +32,43 @@ def virtual_lidar(x, y):
 
 
 def print_grid_map(sensor_data):
-    size  = (500, 500)
-    screen
+    grid_map = [['○ ' for _ in range(10)] for _ in range(10)]
+    grid_map = np.array(grid_map)
+
+    index_ans = np.nonzero(sensor_data)
+    index = index_ans[0][0]
+    x = sensor_data[index] * cos(radians(index)) + 250
+    y = sensor_data[index] * sin(radians(index)) + 250
+
+    index_y = int(9 - y // 50)
+    index_x = int(x // 50)
+
+    if 0 <= index_x < 10 and 0 <= index_y < 10:
+        grid_map[index_y][index_x] = 'X '
+    else:
+        pass
+
+    for i in range(grid_map.shape[-1]):
+        for j in range(grid_map.shape[0]):
+            print(grid_map[i][j], end='')
+        print('')
+
+    print('-' * 50)
+
 
 def main():
     pygame.draw.circle(screen, (255, 255, 255), [250, 250], 5)
-    pygame.display.set_caption('Mouse_detection')
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 return
-        screen1.fill((0, 255, 0))
+
         x = pygame.mouse.get_pos()[0] - 250
         y = -pygame.mouse.get_pos()[1] + 250
 
         sensor_data = virtual_lidar(x, y)
-        print(sensor_data)
-        # print_grid_map(sensor_data)
+        print_grid_map(sensor_data)
 
         pygame.display.flip()
         clock.tick(rate)
