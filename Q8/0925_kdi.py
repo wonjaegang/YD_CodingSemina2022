@@ -61,42 +61,83 @@ def print_grid(grid):
             print(grid[row][column], end='')
         print('')
 
+def print_multi_grid(grid1, grid2):
+    for row in range(grid1.shape[-1]):
+        for column in range(grid1.shape[0]):
+            print(f'{grid1[row][column]}', end='')
+        print('             ', end='')
+        for column in range(grid2.shape[0]):
+            print(f'{grid2[row][column]}', end='')
+        print('')
+
 def input_two_points():
-    input_string = input('배의 머리, 꼬리 좌표를 입력하시오: ').split(', ')
+    input_string = input('배의 머리, 꼬리 좌표를 입력하시오: ').split(',')
     return list(map(lambda x : int(x), input_string))
 
 def input_attack_points():
-    input_attack_string = input('공격할 좌표를 입력하시오: ').split(', ')
+    input_attack_string = input('공격할 좌표를 입력하시오: ').split(',')
     return list(map(lambda x : int(x), input_attack_string))
 
 def grid_battleship(grid):
-    x1, y1, x2, y2 = input_two_points()
     count = 0
-    while count < 0:
+    while count < 4:
+        x1, y1, x2, y2 = input_two_points()
         if x1 == x2:
-            for i in range(min(y1, y2), max(y1, y2)):
+            for i in range(min(y1, y2), max(y1, y2) + 1):
                 grid[x1 - 1][i - 1] = 'X  '
         elif y1 == y2:
-            for i in range(min(x1, x2), max(x1, x2)):
-                grid[y1 - 1][i - 1] = 'X  '
+            for i in range(min(x1, x2), max(x1, x2) + 1):
+                grid[i - 1][y1 - 1] = 'X  '
         else:
             print('잘못된 배치입니다. 다시 입력하세요.')
             continue
         print_grid(grid)
         count += 1
+    print('-' * 10)
     return grid
 
 def attack_game_start(grid1, grid2):
-    ㅜㄷㅈ
+    new_grid1 = creat_grid()
+    new_grid2 = creat_grid()
+
     while True:
+        count1 = 0
+        count2 = 0
         print('플레이어1 공격하시오')
         x1, y1 = input_attack_points()
-        if grid1[x1 - 1][y1 - 1] == 'X  ':
+        if grid2[x1 - 1][y1 - 1] == 'X  ':
             print('플레이어1 공격 성공')
-            grid1[x1 - 1][y1 - 1] == 'O  '
+            grid2[x1 - 1][y1 - 1] = 'O  '
+            new_grid2[x1 - 1][y1 - 1] = 'V  '
         else:
-            print('플레이어1 공격 실패'):
+            print('플레이어1 공격 실패')
 
+        print('플레이어2 공격하시오')
+        x1, y1 = input_attack_points()
+        if grid1[x1 - 1][y1 - 1] == 'X  ':
+            print('플레이어2 공격 성공')
+            grid1[x1 - 1][y1 - 1] = 'O  '
+            new_grid1[x1 - 1][y1 - 1] = 'V  '
+        else:
+            print('플레이어2 공격 실패')
+
+        # 1 or 2의 모든 좌표가 'O  ' 즉, 배가 모두 파괴되면 승자, 패자 결정.
+        for element in grid2.flat:
+            if element == 'X  ':
+                count2 += 1
+        if count2 == 0:
+            print('플레이어1의 승리입니다.')
+            break
+
+        for element in grid1.flat:
+            if element == 'X  ':
+                count1 += 1
+        if count1 == 0:
+            print('플레이어2의 승리입니다.')
+            break
+
+        print('공격 결과')
+        print_multi_grid(new_grid1, new_grid2)
 
 def main():
     print('Player1, 자신의 배를 위치시키시오.')
@@ -104,11 +145,8 @@ def main():
     print('Player2, 자신의 배를 위치시키시오.')
     grid_p2 = grid_battleship(creat_grid())
     print('게임을 시작합니다. 각 플레이어는 공격할 좌표를 선정하여 공격하시오.')
-
-
-    while True:
-        att_r, att_c = map(int, input(f'Player1\n공격할 좌표를 입력하시오: ').split(', '))
-        game_b(att_r, att_c)
+    attack_game_start(grid_p1, grid_p2)
+    print('게임 종료')
 
 
 if __name__ == '__main__':
